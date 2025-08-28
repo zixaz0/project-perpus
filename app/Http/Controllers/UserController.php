@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -37,13 +38,21 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // validasi foto
         ]);
+
+        // handle upload foto
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('foto_users', 'public');
+        }
 
         User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => 'kasir',
+            'foto'     => $fotoPath,
         ]);
 
         return redirect()->route('kasir.index')->with('success', 'Kasir berhasil ditambahkan!');
@@ -52,8 +61,9 @@ class UserController extends Controller
     // 🔹 Edit Kasir
     public function kasirEdit($id)
     {
+        $title = "Edit Kasir";
         $kasir = User::where('role', 'kasir')->findOrFail($id);
-        return view('admin.edit_kasir', compact('kasir'));
+        return view('admin.edit_kasir', compact('kasir', 'title'));
     }
 
     // 🔹 Update Kasir
@@ -65,6 +75,7 @@ class UserController extends Controller
             'name'  => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $kasir->id,
             'password' => 'nullable|string|min:6|confirmed',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $kasir->name  = $request->name;
@@ -74,10 +85,20 @@ class UserController extends Controller
             $kasir->password = Hash::make($request->password);
         }
 
+        // ✅ Update foto kalau ada upload baru
+        if ($request->hasFile('foto')) {
+            // hapus foto lama kalau ada
+            if ($kasir->foto && Storage::disk('public')->exists($kasir->foto)) {
+                Storage::disk('public')->delete($kasir->foto);
+            }            
+            $kasir->foto = $request->file('foto')->store('foto_users', 'public');
+        }
+
         $kasir->save();
 
         return redirect()->route('kasir.index')->with('success', 'Kasir berhasil diupdate!');
     }
+
 
     public function kasirDestroy($id)
     {

@@ -161,8 +161,10 @@
                 <!-- User Dropdown -->
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center gap-2 focus:outline-none">
-                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=random"
-                            alt="avatar" class="w-8 h-8 rounded-full">
+                        <img src="{{ Auth::user()->foto
+                            ? asset('storage/' . Auth::user()->foto)
+                            : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
+                            alt="avatar" class="w-8 h-8 rounded-full object-cover">
                         <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
                         <i class="fas fa-chevron-down text-xs text-gray-500"></i>
                     </button>
@@ -235,30 +237,33 @@
             })
         }
     </script>
-<script>
-    function showProfile() {
-        Swal.fire({
-            title: 'Profil Saya',
-            html: `
-                <div class="flex flex-col items-center space-y-4">
-                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=random&size=100"
-                         alt="avatar" class="w-24 h-24 rounded-full shadow-md">
-                    
-                    <div class="text-left space-y-2 w-full">
-                        <p><strong>Nama:</strong> {{ Auth::user()->name }}</p>
-                        <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
-                        <p><strong>Role:</strong> {{ ucfirst(Auth::user()->role) }}</p>
-                    </div>
+
+    <script>
+        function showProfile() {
+            Swal.fire({
+                title: 'Profil Saya',
+                html: `
+            <div class="flex flex-col items-center space-y-4">
+                <img src="{{ Auth::user()->foto
+                    ? asset('storage/' . Auth::user()->foto)
+                    : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random&size=100' }}"
+                     alt="avatar" class="w-24 h-24 rounded-full shadow-md object-cover">
+                
+                <div class="text-left space-y-2 w-full">
+                    <p><strong>Nama:</strong> {{ Auth::user()->name }}</p>
+                    <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
+                    <p><strong>Role:</strong> {{ ucfirst(Auth::user()->role) }}</p>
                 </div>
-            `,
-            showCancelButton: false,
-            confirmButtonText: 'Tutup',
-            confirmButtonColor: '#4F46E5',
-            customClass: {
-                popup: 'rounded-2xl shadow-lg'
-            }
-        })
-    }
-</script>
+            </div>
+        `,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#4F46E5',
+                customClass: {
+                    popup: 'rounded-2xl shadow-lg'
+                }
+            })
+        }
+    </script>
 </body>
+
 </html>
