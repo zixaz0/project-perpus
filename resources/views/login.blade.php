@@ -80,7 +80,7 @@
                 <div class="mx-auto w-44 h-44 rounded-full bg-white flex items-center justify-center shadow-lg mb-6">
                     <img src="{{ asset('images/logo.png') }}" 
                         alt="Logo" 
-                        class="w-29 h-29 object-contain">
+                        class="w-28 h-28 object-contain">
                 </div>
 
                 <p class="text-sm opacity-80 mt-2">Sistem Manajemen Buku Modern</p>

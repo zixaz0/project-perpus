@@ -78,21 +78,21 @@
     </div>
 @endsection
 
-    <script>
-        function confirmEdit() {
-            Swal.fire({
-                title: "Apakah kamu yakin?",
-                text: "Perubahan akan disimpan!",
-                icon: "question",
-                showDenyButton: true,
-                showCancelButton: true,
-                confirmButtonText: "Simpan",
-                denyButtonText: `Jangan Simpan`
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById("form-edit-buku").submit();
-                } else if (result.isDenied) {
-                    Swal.fire({
+<script>
+    function confirmEdit() {
+        Swal.fire({
+            title: "Apakah kamu yakin?",
+            text: "Perubahan akan disimpan!",
+            icon: "question",
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Simpan",
+            denyButtonText: `Jangan Simpan`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById("form-edit-buku").submit();
+            } else if (result.isDenied) {
+                Swal.fire({
                     title: "Perubahan tidak disimpan",
                     icon: "info",
                     timer: 1500,
@@ -101,6 +101,6 @@
                     window.location.href = "{{ route('admin.buku.index') }}";
                 });
             }
-            });
-        }
-    </script>
+        });
+    }
+</script>

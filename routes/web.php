@@ -7,6 +7,7 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\KasirController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return view('login');
@@ -22,11 +23,21 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/management_buku', [BukuController::class, 'index'])->name('admin.management_buku');
-    Route::get('/admin/management_kasir', [AdminController::class, 'management_kasir'])->name('admin.management_kasir');
+    Route::get('/admin/management_kasir', [UserController::class, 'KasirIndex'])->name('admin.management_kasir');
     Route::get('/admin/riwayat_transaksi', [AdminController::class, 'riwayat_transaksi'])->name('admin.riwayat_transaksi');
+    // Buku
     Route::resource('buku', BukuController::class)->names('admin.buku');
     Route::get('/buku/{id}/edit', [BukuController::class, 'edit'])->name('buku.edit');
     Route::put('/buku/{id}', [BukuController::class, 'update'])->name('buku.update');
+    // Kasir Management (khusus admin)
+    Route::prefix('admin')->group(function () {
+        Route::get('/kasir', [UserController::class, 'kasirIndex'])->name('kasir.index');
+        Route::get('/kasir/create', [UserController::class, 'kasirCreate'])->name('kasir.create');
+        Route::post('/kasir', [UserController::class, 'kasirStore'])->name('kasir.store');
+        Route::delete('/kasir/{id}', [UserController::class, 'kasirDestroy'])->name('kasir.destroy');
+        Route::get('/kasir/{id}/edit', [UserController::class, 'kasirEdit'])->name('kasir.edit');
+        Route::put('/kasir/{id}', [UserController::class, 'kasirUpdate'])->name('kasir.update');
+    });
 });
 
 // Hanya owner
