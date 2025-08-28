@@ -9,6 +9,7 @@ class BukuController extends Controller
 {
     public function index(Request $request)
     {
+        $title = 'Management Buku';
         $query = Buku::query();
 
         // kalau ada pencarian
@@ -23,11 +24,12 @@ class BukuController extends Controller
         // kalau datanya banyak, lebih enak pakai paginate
         $buku = $query->latest()->paginate(10);
 
-        return view('admin.management_buku', compact('buku'));
+        return view('admin.management_buku', compact('buku', 'title'));
     }
 
     public function indexowner(Request $request)
     {
+        $title = 'Data Buku';
         $query = Buku::query();
 
         // kalau ada pencarian
@@ -42,7 +44,7 @@ class BukuController extends Controller
         // kalau datanya banyak, lebih enak pakai paginate
         $buku = $query->latest()->paginate(10);
 
-        return view('owner.data_buku', compact('buku'));
+        return view('owner.data_buku', compact('buku', 'title'));
     }
 
     public function create()

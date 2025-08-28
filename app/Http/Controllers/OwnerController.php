@@ -19,7 +19,9 @@ class OwnerController extends Controller
 
     public function index()
     {
-        return view('owner.dashboard');
+        return view('owner.dashboard', [
+            'title' => 'Dashboard'
+        ]);        
     }
     public function data_buku()
     {

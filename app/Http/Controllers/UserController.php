@@ -10,6 +10,7 @@ class UserController extends Controller
 {
     public function kasirIndex(Request $request)
     {
+        $title = 'Management Kasir';
         $query = User::where('role', 'kasir');
 
         if ($request->filled('q')) {
@@ -22,7 +23,7 @@ class UserController extends Controller
 
         $kasir = $query->latest()->paginate(10);
 
-        return view('admin.management_kasir', compact('kasir'));
+        return view('admin.management_kasir', compact('kasir', 'title'));
     }
 
     public function kasirCreate()

@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mx-auto px-4 py-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Manajemen Buku</h1>
+            <h1 class="text-2xl font-bold"></h1>
             <div class="flex items-center space-x-3">
                 <!-- Search Bar -->
                 <form action="{{ route('owner.data_buku') }}" method="GET" class="flex">

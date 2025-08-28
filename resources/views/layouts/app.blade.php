@@ -140,9 +140,58 @@
     </aside>
 
     <!-- Konten -->
-    <main class="flex-1 ml-64 p-8 overflow-y-auto">
-        @yield('content')
+    <main class="flex-1 ml-64 flex flex-col h-screen">
+
+        <!-- Navbar -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
+            <!-- Kiri: Judul Halaman -->
+            <div class="text-lg font-semibold text-gray-700">
+                <p>{{ $title ?? '' }}</p>
+            </div>
+
+            <!-- Kanan: User Info -->
+            <div class="flex items-center gap-4">
+                <!-- Notifikasi -->
+                <button class="relative text-gray-600 hover:text-indigo-600">
+                    <i class="fas fa-bell text-lg"></i>
+                    <span
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                </button>
+
+                <!-- User Dropdown -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="flex items-center gap-2 focus:outline-none">
+                        <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=random"
+                            alt="avatar" class="w-8 h-8 rounded-full">
+                        <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                    </button>
+
+                    <!-- Dropdown -->
+                    <div x-show="open" @click.away="open = false"
+                        class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
+                        <button type="button" onclick="showProfile()"
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i> Profil
+                        </button>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="button" onclick="confirmLogout()"
+                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Isi Konten -->
+        <section class="flex-1 p-8 overflow-y-auto">
+            @yield('content')
+        </section>
     </main>
+
 
     <script>
         // ✅ SweetAlert sukses setelah redirect
@@ -167,27 +216,49 @@
         @endif
     </script>
 
-        <script>
-            function confirmLogout() {
-                Swal.fire({
-                    title: 'Yakin ingin logout?',
-                    text: "Anda akan keluar dari sesi ini.",
-                    icon: 'warning',
-                    iconColor: 'red',
-                    showCancelButton: true,
-                    confirmButtonColor: 'red',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Ya, Logout',
-                    cancelButtonText: 'Batal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('logout-form').submit();
-                    }
-                })
+    <script>
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Yakin ingin logout?',
+                text: "Anda akan keluar dari sesi ini.",
+                icon: 'warning',
+                iconColor: 'red',
+                showCancelButton: true,
+                confirmButtonColor: 'red',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Logout',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            })
+        }
+    </script>
+<script>
+    function showProfile() {
+        Swal.fire({
+            title: 'Profil Saya',
+            html: `
+                <div class="flex flex-col items-center space-y-4">
+                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=random&size=100"
+                         alt="avatar" class="w-24 h-24 rounded-full shadow-md">
+                    
+                    <div class="text-left space-y-2 w-full">
+                        <p><strong>Nama:</strong> {{ Auth::user()->name }}</p>
+                        <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
+                        <p><strong>Role:</strong> {{ ucfirst(Auth::user()->role) }}</p>
+                    </div>
+                </div>
+            `,
+            showCancelButton: false,
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#4F46E5',
+            customClass: {
+                popup: 'rounded-2xl shadow-lg'
             }
-        </script>
-
-
+        })
+    }
+</script>
 </body>
-
 </html>
