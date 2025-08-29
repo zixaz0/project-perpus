@@ -41,6 +41,18 @@
                 </div>
 
                 <div>
+                    <label for="kategori_id" class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                    <select id="kategori_id" name="kategori_id" class="w-full border rounded-lg px-3 py-2" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach ($kategori as $kategori)
+                            <option value="{{ $kategori->id }}" {{ $buku->kategori_id == $kategori->id ? 'selected' : '' }}>
+                                {{ $kategori->kategori }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
                     <label for="tahun_terbit" class="block text-sm font-medium text-gray-700 mb-2">Tahun Terbit</label>
                     <input type="date" id="tahun_terbit" name="tahun_terbit"
                         value="{{ old('tahun_terbit', \Carbon\Carbon::parse($buku->tahun_terbit)->format('Y-m-d')) }}"

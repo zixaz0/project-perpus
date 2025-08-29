@@ -18,6 +18,7 @@ class Buku extends Model
         'judul_buku',
         'penerbit',
         'pengarang',
+        'kategori_id',
         'tahun_terbit',
         'cover_buku',
     ];
@@ -26,4 +27,8 @@ class Buku extends Model
     protected $casts = [
         'tahun_terbit' => 'date',
     ];
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class, 'kategori_id');
+    }
 }

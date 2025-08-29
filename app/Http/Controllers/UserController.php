@@ -34,12 +34,24 @@ class UserController extends Controller
 
     public function kasirStore(Request $request)
     {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // validasi foto
-        ]);
+        $request->validate(
+            [
+                'name'     => 'required|string|max:255',
+                'email'    => 'required|email|unique:users',
+                'password' => 'required|string|min:6|confirmed',
+                'password_confirmation' => 'required|string|same:password|min:6',
+                'foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ],
+            [
+                'name.required' => 'Nama harus diisi.',
+                'email.required' => 'Email harus diisi.',
+                'password.required' => 'Password harus diisi.',
+                'password_confirmation.required' => 'Konfirmasi Password harus diisi.',
+                'password.min' => 'Password minimal 6 karakter.',
+                'password_confirmation.min' => 'Konfirmasi Password minimal 6 karakter.',
+                'password.same' => 'Password dan Konfirmasi Password harus sama.',
+            ]
+        );
 
         // handle upload foto
         $fotoPath = null;
@@ -90,7 +102,7 @@ class UserController extends Controller
             // hapus foto lama kalau ada
             if ($kasir->foto && Storage::disk('public')->exists($kasir->foto)) {
                 Storage::disk('public')->delete($kasir->foto);
-            }            
+            }
             $kasir->foto = $request->file('foto')->store('foto_users', 'public');
         }
 

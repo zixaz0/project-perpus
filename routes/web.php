@@ -8,6 +8,7 @@ use App\Http\Controllers\KasirController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OwnerPegawaiController;
 
 Route::get('/', function () {
     return view('login');
@@ -44,9 +45,12 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
 Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function () {
     Route::get('/owner', [OwnerController::class, 'index'])->name('owner.dashboard');
     Route::get('/owner/data_buku', [BukuController::class, 'indexowner'])->name('owner.data_buku');
-    Route::get('/owner/data_pegawai', [OwnerController::class, 'data_pegawai'])->name('owner.data_pegawai');
+    Route::get('/owner/data_pegawai', [OwnerPegawaiController::class, 'index'])->name('owner.data_pegawai');
     Route::get('/owner/laporan_penjualan', [OwnerController::class, 'laporan_penjualan'])->name('owner.laporan_penjualan');
     Route::get('/owner/data_buku', [BukuController::class, 'indexowner'])->name('owner.data_buku');
+    Route::prefix('owner')->name('owner.')->middleware(['auth', 'role:owner'])->group(function () {
+        Route::resource('pegawai', OwnerPegawaiController::class);
+    });
 });
 
 // Hanya kasir

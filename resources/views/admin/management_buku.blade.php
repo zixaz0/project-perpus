@@ -34,6 +34,7 @@
                         <th class="px-4 py-2 text-left">Judul</th>
                         <th class="px-4 py-2 text-left">Penerbit</th>
                         <th class="px-4 py-2 text-left">Pengarang</th>
+                        <th class="px-4 py-2 text-left">kategori</th>
                         <th class="px-4 py-2 text-left">Tahun Terbit</th>
                         <th class="px-4 py-2 text-left">Cover</th>
                         <th class="px-4 py-2 text-center">Aksi</th>
@@ -47,6 +48,7 @@
                             <td class="px-4 py-2">{{ $item->judul_buku }}</td>
                             <td class="px-4 py-2">{{ $item->penerbit }}</td>
                             <td class="px-4 py-2">{{ $item->pengarang }}</td>
+                            <td class="px-4 py-2">{{ $item->kategori->kategori }}</td>
                             <td class="px-4 py-2">{{ $item->tahun_terbit->format('d-m-Y') }}</td>
                             <td class="px-4 py-2">
                                 <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover"
@@ -109,4 +111,4 @@
             }
         })
     }
-</script>
+</script>   

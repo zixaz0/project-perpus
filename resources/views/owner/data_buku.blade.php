@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mx-auto px-4 py-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold"></h1>
+            <h1 class="text-2xl font-bold"> Data Buku</h1>
             <div class="flex items-center space-x-3">
                 <!-- Search Bar -->
                 <form action="{{ route('owner.data_buku') }}" method="GET" class="flex">
@@ -26,6 +26,7 @@
                         <th class="px-4 py-2 text-left">Judul</th>
                         <th class="px-4 py-2 text-left">Penerbit</th>
                         <th class="px-4 py-2 text-left">Pengarang</th>
+                        <th class="px-4 py-2 text-left">kategori</th>
                         <th class="px-4 py-2 text-left">Tahun Terbit</th>
                         <th class="px-4 py-2 text-left">Cover</th>
                     </tr>
@@ -38,6 +39,7 @@
                             <td class="px-4 py-2">{{ $item->judul_buku }}</td>
                             <td class="px-4 py-2">{{ $item->penerbit }}</td>
                             <td class="px-4 py-2">{{ $item->pengarang }}</td>
+                            <td class="px-4 py-2">{{ $item->kategori->kategori }}</td>
                             <td class="px-4 py-2">{{ $item->tahun_terbit->format('d-m-Y') }}</td>
                             <td class="px-4 py-2">
                                 <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover"

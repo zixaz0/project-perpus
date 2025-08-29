@@ -145,8 +145,39 @@
         <!-- Navbar -->
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shadow-sm">
             <!-- Kiri: Judul Halaman -->
-            <div class="text-lg font-semibold text-gray-700">
-                <p>{{ $title ?? '' }}</p>
+            <div class="text-lg font-semibold text-gray-700" id="datetime">
+                <script>
+                    function updateDateTime() {
+                        const now = new Date();
+                
+                        // Format hari dalam bahasa Indonesia
+                        const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+                        const dayName = days[now.getDay()];
+                
+                        // Format tanggal
+                        const day = String(now.getDate()).padStart(2, '0');
+                        const monthNames = [
+                            'Januari','Februari','Maret','April','Mei','Juni',
+                            'Juli','Agustus','September','Oktober','November','Desember'
+                        ];
+                        const month = monthNames[now.getMonth()];
+                        const year = now.getFullYear();
+                
+                        // Format jam
+                        const hours = String(now.getHours()).padStart(2, '0');
+                        const minutes = String(now.getMinutes()).padStart(2, '0');
+                        const seconds = String(now.getSeconds()).padStart(2, '0');
+                
+                        const formatted = `${dayName}, ${day} ${month} ${year} | ${hours}:${minutes}:${seconds}`;
+                
+                        document.getElementById('datetime').innerText = formatted;
+                    }
+                
+                    // update tiap detik
+                    setInterval(updateDateTime, 1000);
+                    // pertama kali jalanin langsung
+                    updateDateTime();
+                </script>
             </div>
 
             <!-- Kanan: User Info -->

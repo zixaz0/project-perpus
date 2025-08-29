@@ -1,11 +1,24 @@
 @extends('layouts.app')
 
+@if ($errors->any())
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                html: `{!! implode('<br>', $errors->all()) !!}`, // tampil semua error
+                confirmButtonColor: '#d33',
+            });
+        });
+    </script>
+@endif
+
 @section('content')
 <div class="max-w-3xl mx-auto px-6 py-10">
     <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">Tambah Kasir</h1>
 
     <div class="bg-white p-8 rounded-2xl shadow-lg border">
-        <form action="{{ route('kasir.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form id="form-tambah-kasir" action="{{ route('kasir.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Nama -->
@@ -45,9 +58,30 @@
             <!-- Tombol -->
             <div class="flex justify-end space-x-4 pt-4 border-t">
                 <a href="{{ route('kasir.index') }}" class="px-5 py-2.5 bg-gray-200 rounded-lg">Batal</a>
-                <button type="submit" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg">Simpan</button>
+                <button type="button" onclick="checkPassword()" 
+                        class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg">
+                    Simpan
+                </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function checkPassword() {
+        let password = document.getElementById("password").value;
+        let confirm  = document.getElementById("password_confirmation").value;
+
+        if (password !== confirm) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Password Tidak Sama',
+                text: 'Pastikan password dan konfirmasi password cocok.',
+                confirmButtonColor: '#d33'
+            });
+        } else {
+            document.getElementById("form-tambah-kasir").submit();
+        }
+    }
+</script>
 @endsection
