@@ -149,30 +149,30 @@
                 <script>
                     function updateDateTime() {
                         const now = new Date();
-                
+
                         // Format hari dalam bahasa Indonesia
-                        const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+                        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                         const dayName = days[now.getDay()];
-                
+
                         // Format tanggal
                         const day = String(now.getDate()).padStart(2, '0');
                         const monthNames = [
-                            'Januari','Februari','Maret','April','Mei','Juni',
-                            'Juli','Agustus','September','Oktober','November','Desember'
+                            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
                         ];
                         const month = monthNames[now.getMonth()];
                         const year = now.getFullYear();
-                
+
                         // Format jam
                         const hours = String(now.getHours()).padStart(2, '0');
                         const minutes = String(now.getMinutes()).padStart(2, '0');
                         const seconds = String(now.getSeconds()).padStart(2, '0');
-                
+
                         const formatted = `${dayName}, ${day} ${month} ${year} | ${hours}:${minutes}:${seconds}`;
-                
+
                         document.getElementById('datetime').innerText = formatted;
                     }
-                
+
                     // update tiap detik
                     setInterval(updateDateTime, 1000);
                     // pertama kali jalanin langsung
@@ -293,6 +293,89 @@
                     popup: 'rounded-2xl shadow-lg'
                 }
             })
+        }
+
+        function showProfile() {
+            Swal.fire({
+                title: 'Profil Saya',
+                html: `
+            <div class="flex flex-col items-center space-y-4">
+
+                <!-- Foto + Tombol Edit -->
+                <div class="relative group w-24 h-24">
+                    <img id="profileImage"
+                        src="{{ Auth::user()->foto
+                            ? asset('storage/' . Auth::user()->foto)
+                            : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random&size=100' }}"
+                        alt="avatar" class="w-24 h-24 rounded-full shadow-md object-cover">
+
+                    <!-- Icon pensil -->
+                    <button type="button"
+                        onclick="document.getElementById('inputFoto').click()"
+                        class="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow opacity-0 group-hover:opacity-100 transition">
+                        <i class="fas fa-pencil-alt text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Input file hidden -->
+                <form id="form-update-photo" action="{{ route('profile.updatePhoto') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="file" id="inputFoto" name="foto" accept="image/*" class="hidden"
+                        onchange="previewImage(this)">
+                </form>
+
+                <div class="text-left space-y-2 w-full">
+                    <p><strong>Nama:</strong> {{ Auth::user()->name }}</p>
+                    <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
+                    <p><strong>Role:</strong> {{ ucfirst(Auth::user()->role) }}</p>
+                </div>
+            </div>
+        `,
+                showConfirmButton: false,
+                width: 400,
+                customClass: {
+                    popup: 'rounded-2xl shadow-lg'
+                },
+                didOpen: () => {
+                    // Tambahin tombol manual
+                    const content = Swal.getHtmlContainer();
+
+                    const btnWrapper = document.createElement('div');
+                    btnWrapper.className = "flex justify-between gap-3 mt-6 w-full";
+
+                    btnWrapper.innerHTML = `
+                <button type="button" id="btnKembali"
+                    class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                    Kembali
+                </button>
+                <button type="button" id="btnSimpan"
+                    class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden">
+                    Simpan Perubahan
+                </button>
+            `;
+
+                    content.appendChild(btnWrapper);
+
+                    // event tombol
+                    document.getElementById('btnKembali').addEventListener('click', () => Swal.close());
+                    document.getElementById('btnSimpan').addEventListener('click', () => {
+                        document.getElementById('form-update-photo').submit();
+                    });
+                }
+            })
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImage').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+
+                // Tampilkan tombol "Simpan Perubahan"
+                document.getElementById('btnSimpan').classList.remove('hidden');
+            }
         }
     </script>
 </body>
