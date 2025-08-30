@@ -65,6 +65,13 @@
                     <i class="fas fa-users"></i> Management Kasir
                 </a>
 
+                <a href="{{ route('admin.kategori.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition 
+                         hover:bg-indigo-50 {{ request()->routeIs('admin.kategori.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    <i class="fas fa-tags"></i> Manajemen Kategori
+                </a>
+
+
                 <a href="{{ route('admin.riwayat_transaksi') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
                         hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
