@@ -190,10 +190,10 @@
             <!-- Kanan: User Info -->
             <div class="flex items-center gap-4">
                 <!-- Notifikasi -->
-                <button class="relative text-gray-600 hover:text-indigo-600">
+                <button class="relative text-gray-600 hover:text-indigo-600 cursor-pointer">
                     <i class="fas fa-bell text-lg"></i>
                     <span
-                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center cursor-pointer">3</span>
                 </button>
 
                 <!-- User Dropdown -->
@@ -203,21 +203,21 @@
                             ? asset('storage/' . Auth::user()->foto)
                             : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
                             alt="avatar" class="w-8 h-8 rounded-full object-cover">
-                        <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        <span class="text-sm font-medium text-gray-700 cursor-pointer">{{ Auth::user()->name }}</span>
+                        <i class="fas fa-chevron-down text-xs text-gray-500 cursor-pointer"></i>
                     </button>
 
                     <!-- Dropdown -->
                     <div x-show="open" @click.away="open = false"
                         class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg py-2 z-50">
                         <button type="button" onclick="showProfile()"
-                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
                             <i class="fas fa-user mr-2"></i> Profil
                         </button>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="button" onclick="confirmLogout()"
-                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Logout
                             </button>
                         </form>

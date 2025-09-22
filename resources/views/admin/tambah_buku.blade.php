@@ -25,9 +25,9 @@
                 <div>
                     <label for="kode_buku" class="block text-sm font-medium text-gray-700 mb-2">Kode Buku</label>
                     <input type="text" id="kode_buku" name="kode_buku"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Masukkan kode buku..." required>
-                </div>
+                        readonly
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 bg-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>                             
 
                 <div>
                     <label for="judul_buku" class="block text-sm font-medium text-gray-700 mb-2">Judul Buku</label>
@@ -81,11 +81,25 @@
                         Batal
                     </a>
                     <button type="submit"
-                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition font-medium">
+                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition font-medium cursor-pointer">
                         Simpan
                     </button>
                 </div>
             </form>
+            <script>
+                document.getElementById('kategori_id').addEventListener('change', function() {
+                    let kategoriId = this.value;
+                    if (kategoriId) {
+                        fetch(`/admin/buku/generate-kode/${kategoriId}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                document.getElementById('kode_buku').value = data.kode_buku;
+                            });
+                    } else {
+                        document.getElementById('kode_buku').value = '';
+                    }
+                });
+            </script>            
         </div>
     </div>
 @endsection

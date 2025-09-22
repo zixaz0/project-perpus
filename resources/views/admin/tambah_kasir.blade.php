@@ -59,7 +59,7 @@
             <div class="flex justify-end space-x-4 pt-4 border-t">
                 <a href="{{ route('kasir.index') }}" class="px-5 py-2.5 bg-gray-200 rounded-lg">Batal</a>
                 <button type="button" onclick="checkPassword()" 
-                        class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg">
+                        class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg cursor-pointer">
                     Simpan
                 </button>
             </div>

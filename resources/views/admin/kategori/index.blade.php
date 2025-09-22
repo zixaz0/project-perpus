@@ -44,7 +44,7 @@
                                     @method('DELETE')
                                     <button type="button"
                                         onclick="confirmDelete({{ $item->id }}, '{{ $item->kategori }}')"
-                                        class="inline-flex items-center justify-center w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full shadow">
+                                        class="inline-flex items-center justify-center w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-full shadow cursor-pointer">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </form>

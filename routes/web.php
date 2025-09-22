@@ -10,6 +10,7 @@ use App\Http\Controllers\BukuController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OwnerPegawaiController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminDashboardController;
 
 Route::get('/', function () {
     return view('login');
@@ -26,7 +27,7 @@ Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto'])
 
 // Hanya admin
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
-    Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/management_buku', [BukuController::class, 'index'])->name('admin.management_buku');
     Route::get('/admin/management_kasir', [UserController::class, 'KasirIndex'])->name('admin.management_kasir');
     Route::get('/admin/riwayat_transaksi', [AdminController::class, 'riwayat_transaksi'])->name('admin.riwayat_transaksi');
@@ -34,6 +35,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
     Route::resource('buku', BukuController::class)->names('admin.buku');
     Route::get('/buku/{id}/edit', [BukuController::class, 'edit'])->name('buku.edit');
     Route::put('/buku/{id}', [BukuController::class, 'update'])->name('buku.update');
+    Route::get('/admin/buku/generate-kode/{kategori_id}', [App\Http\Controllers\BukuController::class, 'generateKode'])->name('admin.buku.generateKode');
     // Kasir Management (khusus admin)
     Route::prefix('admin')->group(function () {
         Route::get('/kasir', [UserController::class, 'kasirIndex'])->name('kasir.index');

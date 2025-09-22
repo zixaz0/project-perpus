@@ -88,7 +88,13 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $kasir->id,
             'password' => 'nullable|string|min:6|confirmed',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+        ],
+    [
+        'name.required' => 'Nama harus diisi.',
+        'email.required' => 'Email harus diisi.',
+        'password.min' => 'Password minimal 6 karakter.',
+        'password.same' => 'Password dan Konfirmasi Password harus sama.',
+    ]);
 
         $kasir->name  = $request->name;
         $kasir->email = $request->email;
