@@ -1,5 +1,27 @@
 @extends('layouts.app')
 
+@section('breadcrumb')
+    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
+        <ol class="list-reset flex">
+            <li>
+                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="{{ route('admin.management_kasir') }}" class="text-blue-600 hover:underline">Management Kasir</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="" class="text-blue-600 hover:underline">Edit Kasir</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="" class="text-blue-600 hover:underline">{{ $kasir->name }}</a>
+            </li>
+        </ol>
+    </nav>
+@endsection
+
 @section('content')
     <div class="max-w-3xl mx-auto px-6 py-10">
         <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">Edit Kasir</h1>

@@ -44,6 +44,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
         Route::delete('/kasir/{id}', [UserController::class, 'kasirDestroy'])->name('kasir.destroy');
         Route::get('/kasir/{id}/edit', [UserController::class, 'kasirEdit'])->name('kasir.edit');
         Route::put('/kasir/{id}', [UserController::class, 'kasirUpdate'])->name('kasir.update');
+        Route::get('/kasir/{id}', [UserController::class, 'show'])->name('kasir.show');
     // Kategori
     Route::resource('kategori', \App\Http\Controllers\KategoriController::class)
     ->names('admin.kategori')

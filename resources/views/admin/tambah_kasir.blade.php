@@ -1,5 +1,23 @@
 @extends('layouts.app')
 
+@section('breadcrumb')
+    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
+        <ol class="list-reset flex">
+            <li>
+                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="{{ route('admin.management_kasir') }}" class="text-blue-600 hover:underline">Management Kasir</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="" class="text-blue-600 hover:underline">Tambah Kasir</a>
+            </li>
+        </ol>
+    </nav>
+@endsection
+
 @if ($errors->any())
     <script>
         document.addEventListener("DOMContentLoaded", function() {

@@ -1,5 +1,19 @@
 @extends('layouts.app')
 
+@section('breadcrumb')
+    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
+        <ol class="list-reset flex">
+            <li>
+                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="{{ route('admin.management_kasir') }}" class="text-blue-600 hover:underline">Management Kasir</a>
+            </li>
+        </ol>
+    </nav>
+@endsection
+
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">

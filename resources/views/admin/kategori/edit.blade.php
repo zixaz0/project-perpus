@@ -1,5 +1,27 @@
 @extends('layouts.app')
 
+@section('breadcrumb')
+    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
+        <ol class="list-reset flex">
+            <li>
+                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="{{ route('admin.kategori.index') }}" class="text-blue-600 hover:underline">Manajemen Kategori</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="" class="text-blue-600 hover:underline">Edit Kategori</a>
+            </li>
+            <li class="mx-2">/</li>
+            <li>
+                <a href="" class="text-blue-600 hover:underline">{{ $kategori->kategori }}</a>
+            </li>
+        </ol>
+    </nav>
+@endsection
+
 @if ($errors->any())
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -43,7 +65,7 @@
                         Batal
                     </a>
                     <button type="button" onclick="confirmEdit()"
-                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition font-medium">
+                        class="cursor-pointer px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-md transition font-medium">
                         Update
                     </button>
                 </div>

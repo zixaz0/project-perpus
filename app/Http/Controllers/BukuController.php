@@ -11,20 +11,28 @@ class BukuController extends Controller
     public function index(Request $request)
     {
         $title = 'Management Buku';
-        $query = Buku::query();
-        $kategori = Kategori::all();
+        $query = Buku::with('kategori'); // load relasi biar gampang
+        $kategori = Kategori::all()->groupBy('kategori'); // dikelompokkan
 
         if ($request->filled('q')) {
             $q = $request->q;
-            $query->where('judul_buku', 'like', "%$q%")
-                ->orWhere('kode_buku', 'like', "%$q%")
-                ->orWhere('penerbit', 'like', "%$q%")
-                ->orWhere('pengarang', 'like', "%$q%");
+            $query->where(function ($sub) use ($q) {
+                $sub->where('judul_buku', 'like', "%$q%")
+                    ->orWhere('kode_buku', 'like', "%$q%")
+                    ->orWhere('penerbit', 'like', "%$q%")
+                    ->orWhere('pengarang', 'like', "%$q%");
+            });
+        }
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
         }
 
         $buku = $query->latest()->paginate(10);
+
         return view('admin.management_buku', compact('buku', 'title', 'kategori'));
     }
+
 
     public function indexowner(Request $request)
     {
@@ -61,22 +69,17 @@ class BukuController extends Controller
             'cover_buku'   => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
         ]);
 
-        // Generate kode otomatis
         $kategori = Kategori::findOrFail($request->kategori_id);
-        $prefixKategori = strtoupper(substr($kategori->kategori, 0, 1));
 
-        $lastBook = Buku::where('kategori_id', $kategori->id)
-            ->orderBy('id', 'desc')
-            ->first();
+        // Prefix kategori & jenis
+        $prefixKategori = strtoupper(substr($kategori->kategori, 0, 2));
+        $prefixJenis    = strtoupper(substr($kategori->jenis, 0, 2));
 
-        if ($lastBook) {
-            $lastNumber = (int) substr($lastBook->kode_buku, 3 + strlen($prefixKategori));
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
+        // Cari buku terakhir
+        $lastBook = Buku::where('kategori_id', $kategori->id)->orderBy('id', 'desc')->first();
+        $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, -3) + 1) : 1;
 
-        $kode_buku = 'BK' . $prefixKategori . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        $kode_buku = 'BK' . $prefixKategori . $prefixJenis . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         $data = $request->only(['judul_buku', 'penerbit', 'pengarang', 'kategori_id', 'tahun_terbit']);
         $data['kode_buku'] = $kode_buku;
@@ -87,7 +90,7 @@ class BukuController extends Controller
 
         Buku::create($data);
 
-        return redirect()->route('admin.management_buku')->with('success', 'Buku berhasil ditambahkan!');
+        return redirect()->route('admin.management_buku')->with('success', 'Buku berhasil ditambahkan dengan kode: ' . $kode_buku);
     }
 
     public function edit($id)
@@ -116,12 +119,14 @@ class BukuController extends Controller
             // 📌 Jika kategori berubah → generate kode baru
             if ($buku->kategori_id != $request->kategori_id) {
                 $kategori = Kategori::findOrFail($request->kategori_id);
-                $prefixKategori = strtoupper(substr($kategori->kategori, 0, 1));
+
+                $prefixKategori = strtoupper(substr($kategori->kategori, 0, 2));
+                $prefixJenis    = strtoupper(substr($kategori->jenis, 0, 2));
 
                 $lastBook = Buku::where('kategori_id', $kategori->id)->orderBy('id', 'desc')->first();
-                $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, 3 + strlen($prefixKategori)) + 1) : 1;
+                $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, -3) + 1) : 1;
 
-                $data['kode_buku'] = 'BK' . $prefixKategori . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+                $data['kode_buku'] = 'BK' . $prefixKategori . $prefixJenis . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
             }
 
             if ($request->hasFile('cover_buku')) {
@@ -153,20 +158,14 @@ class BukuController extends Controller
     public function generateKode($kategori_id)
     {
         $kategori = Kategori::findOrFail($kategori_id);
-        $prefixKategori = strtoupper(substr($kategori->kategori, 0, 1));
 
-        $lastBook = Buku::where('kategori_id', $kategori_id)
-            ->orderBy('id', 'desc')
-            ->first();
+        $prefixKategori = strtoupper(substr($kategori->kategori, 0, 2));
+        $prefixJenis    = strtoupper(substr($kategori->jenis, 0, 2));
 
-        if ($lastBook) {
-            $lastNumber = (int) substr($lastBook->kode_buku, 3 + strlen($prefixKategori));
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
+        $lastBook = Buku::where('kategori_id', $kategori_id)->orderBy('id', 'desc')->first();
+        $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, -3) + 1) : 1;
 
-        $kode_buku = 'BK' . $prefixKategori . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        $kode_buku = 'BK' . $prefixKategori . $prefixJenis . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         return response()->json(['kode_buku' => $kode_buku]);
     }
