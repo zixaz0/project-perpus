@@ -8,7 +8,7 @@
             </li>
             <li class="mx-2">/</li>
             <li>
-                <a href="{{ route('admin.management_buku') }}" class="text-blue-600 hover:underline">Management Buku</a>
+                <a href="{{ route('admin.buku.index') }}" class="text-blue-600 hover:underline">Management Buku</a>
             </li>
             <li class="mx-2">/</li>
             <li>
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="flex justify-end space-x-4 pt-4 border-t">
-                    <a href="{{ route('admin.management_buku') }}"
+                    <a href="{{ route('admin.buku.index') }}"
                         class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg">Batal</a>
                     <button type="submit"
                         class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer">Simpan

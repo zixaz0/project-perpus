@@ -8,7 +8,7 @@
             </li>
             <li class="mx-2">/</li>
             <li>
-                <a href="{{ route('admin.management_kasir') }}" class="text-blue-600 hover:underline">Management Kasir</a>
+                <a href="{{ route('admin.kasir.index') }}" class="text-blue-600 hover:underline">Management Kasir</a>
             </li>
             <li class="mx-2">/</li>
             <li>

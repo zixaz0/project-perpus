@@ -11,6 +11,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\OwnerPegawaiController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\StokHargaController;
+use App\Http\Controllers\TransaksiController;
 
 Route::get('/', function () {
     return view('login');
@@ -28,14 +30,18 @@ Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto'])
 // Hanya admin
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/management_buku', [BukuController::class, 'index'])->name('admin.management_buku');
-    Route::get('/admin/management_kasir', [UserController::class, 'KasirIndex'])->name('admin.management_kasir');
+    Route::get('/admin/buku.index', [BukuController::class, 'index'])->name('admin.buku.index');
+    Route::get('/admin/kasir.index', [UserController::class, 'KasirIndex'])->name('admin.kasir.index');
     Route::get('/admin/riwayat_transaksi', [AdminController::class, 'riwayat_transaksi'])->name('admin.riwayat_transaksi');
     // Buku
     Route::resource('buku', BukuController::class)->names('admin.buku');
     Route::get('/buku/{id}/edit', [BukuController::class, 'edit'])->name('buku.edit');
     Route::put('/buku/{id}', [BukuController::class, 'update'])->name('buku.update');
     Route::get('/admin/buku/generate-kode/{kategori_id}', [App\Http\Controllers\BukuController::class, 'generateKode'])->name('admin.buku.generateKode');
+    
+    // Stok & Harga (resource dengan prefix admin)
+    Route::resource('stok_harga', StokHargaController::class)->names('admin.stok_harga');
+    
     // Kasir Management (khusus admin)
     Route::prefix('admin')->group(function () {
         Route::get('/kasir', [UserController::class, 'kasirIndex'])->name('kasir.index');
@@ -65,9 +71,28 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
 });
 
 // Hanya kasir
-Route::middleware(['auth', RoleMiddleware::class . ':kasir'])->group(function () {
-    Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.dashboard');
-    Route::get('/kasir/data_buku', [KasirController::class, 'data_buku'])->name('kasir.data_buku');
-    Route::get('/kasir/transaksi', [KasirController::class, 'transaksi'])->name('kasir.transaksi');
-    Route::get('/kasir/riwayat_transaksi', [KasirController::class, 'riwayat_transaksi'])->name('kasir.riwayat_transaksi');
+Route::middleware(['auth', RoleMiddleware::class . ':kasir'])->prefix('kasir')->name('kasir.')->group(function () {
+    
+    // Dashboard Kasir
+    Route::get('/', [KasirController::class, 'index'])->name('dashboard');
+
+    // Data Buku
+    Route::get('/buku', [BukuController::class, 'indexkasir'])->name('buku.index');
+
+    // Riwayat Transaksi
+    Route::get('/riwayat_transaksi', [KasirController::class, 'riwayat_transaksi'])->name('riwayat_transaksi');
+
+    // Transaksi / Keranjang
+    Route::prefix('transaksi')->name('transaksi.')->group(function () {
+        Route::get('/', [TransaksiController::class, 'index'])->name('index'); // lihat keranjang
+        Route::post('add/{buku}', [TransaksiController::class, 'addToCart'])->name('add'); // tambah buku
+        Route::delete('remove/{buku}', [TransaksiController::class, 'removeFromCart'])->name('remove'); // hapus buku
+        Route::post('checkout', [TransaksiController::class, 'checkout'])->name('checkout'); // simpan transaksi
+        Route::get('struk/{id}', [TransaksiController::class, 'struk'])->name('struk'); // cetak struk
+        Route::patch('update/{buku}', [TransaksiController::class, 'updateQty'])->name('update');
+        Route::get('/reset-cart', function () {
+            session()->forget('cart');
+            return 'Cart berhasil direset!';
+        });   
+    });
 });

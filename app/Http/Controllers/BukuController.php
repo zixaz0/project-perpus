@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
-use Illuminate\Http\Request;
 use App\Models\Kategori;
+use App\Models\StokHarga;
+use Illuminate\Http\Request;
 
 class BukuController extends Controller
 {
     public function index(Request $request)
     {
         $title = 'Management Buku';
-        $query = Buku::with('kategori'); // load relasi biar gampang
-        $kategori = Kategori::all()->groupBy('kategori'); // dikelompokkan
+        $query = Buku::with(['kategori', 'stokHarga']); // load stokHarga juga
+        $kategori = Kategori::all()->groupBy('kategori');
 
         if ($request->filled('q')) {
             $q = $request->q;
@@ -30,14 +31,38 @@ class BukuController extends Controller
 
         $buku = $query->latest()->paginate(10);
 
-        return view('admin.management_buku', compact('buku', 'title', 'kategori'));
+        return view('admin.buku.index', compact('buku', 'title', 'kategori'));
     }
 
+    public function indexkasir(Request $request)
+    {
+        $title = 'Data Buku';
+        $query = Buku::with(['kategori', 'stokHarga']);
+        $kategori = Kategori::all()->groupBy('kategori');
+
+        if ($request->filled('q')) {
+            $q = $request->q;
+            $query->where(function ($sub) use ($q) {
+                $sub->where('judul_buku', 'like', "%$q%")
+                    ->orWhere('kode_buku', 'like', "%$q%")
+                    ->orWhere('penerbit', 'like', "%$q%")
+                    ->orWhere('pengarang', 'like', "%$q%");
+            });
+        }
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->kategori_id);
+        }
+
+        $buku = $query->latest()->paginate(10);
+
+        return view('kasir.buku.index', compact('buku', 'title', 'kategori'));
+    }
 
     public function indexowner(Request $request)
     {
         $title = 'Data Buku';
-        $query = Buku::query();
+        $query = Buku::with('stokHarga');
         $kategori = Kategori::all();
 
         if ($request->filled('qu')) {
@@ -55,7 +80,7 @@ class BukuController extends Controller
     public function create()
     {
         $kategori = Kategori::all();
-        return view('admin.tambah_buku', compact('kategori'));
+        return view('admin.buku.create', compact('kategori'));
     }
 
     public function store(Request $request)
@@ -66,7 +91,9 @@ class BukuController extends Controller
             'pengarang'    => 'required',
             'tahun_terbit' => 'required|date',
             'kategori_id'  => 'required|exists:kategori,id',
-            'cover_buku'   => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
+            'cover_buku'   => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'stok'         => 'required|integer|min:0',
+            'harga'        => 'required|numeric|min:0',
         ]);
 
         $kategori = Kategori::findOrFail($request->kategori_id);
@@ -88,14 +115,21 @@ class BukuController extends Controller
             $data['cover_buku'] = $request->file('cover_buku')->store('covers', 'public');
         }
 
-        Buku::create($data);
+        $buku = Buku::create($data);
 
-        return redirect()->route('admin.management_buku')->with('success', 'Buku berhasil ditambahkan dengan kode: ' . $kode_buku);
+        // Simpan stok & harga
+        StokHarga::create([
+            'buku_id' => $buku->id,
+            'stok'    => $request->stok,
+            'harga'   => $request->harga,
+        ]);
+
+        return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil ditambahkan dengan kode: ' . $kode_buku);
     }
 
     public function edit($id)
     {
-        $buku = Buku::findOrFail($id);
+        $buku = Buku::with('stokHarga')->findOrFail($id);
         $kategori = Kategori::all();
         return view('admin.edit_buku', compact('buku', 'kategori'));
     }
@@ -110,6 +144,8 @@ class BukuController extends Controller
                 'kategori_id'  => 'required|exists:kategori,id',
                 'tahun_terbit' => 'required|date',
                 'cover_buku'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'stok'         => 'required|integer|min:0',
+                'harga'        => 'required|numeric|min:0',
             ]);
 
             $buku = Buku::findOrFail($id);
@@ -135,7 +171,21 @@ class BukuController extends Controller
 
             $buku->update($data);
 
-            return redirect()->route('admin.management_buku')
+            // Update stok & harga
+            if ($buku->stokHarga) {
+                $buku->stokHarga->update([
+                    'stok'  => $request->stok,
+                    'harga' => $request->harga,
+                ]);
+            } else {
+                StokHarga::create([
+                    'buku_id' => $buku->id,
+                    'stok'    => $request->stok,
+                    'harga'   => $request->harga,
+                ]);
+            }
+
+            return redirect()->route('admin.buku.index')
                 ->with('success', 'Buku berhasil diperbarui!');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal update: ' . $e->getMessage()]);
@@ -147,10 +197,10 @@ class BukuController extends Controller
         try {
             $buku = Buku::findOrFail($id);
             $buku->delete();
-            return redirect()->route('admin.management_buku')
+            return redirect()->route('admin.buku.index')
                 ->with('success', 'Buku berhasil dihapus!');
         } catch (\Exception $e) {
-            return redirect()->route('admin.management_buku')
+            return redirect()->route('admin.buku.index')
                 ->with('error', 'Gagal menghapus buku!');
         }
     }

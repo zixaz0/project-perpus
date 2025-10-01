@@ -8,7 +8,7 @@
             </li>
             <li class="mx-2">/</li>
             <li>
-                <a href="{{ route('admin.management_buku') }}" class="text-blue-600 hover:underline">Management Buku</a>
+                <a href="" class="text-blue-600 hover:underline">Management Buku</a>
             </li>
         </ol>
     </nav>

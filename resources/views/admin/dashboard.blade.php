@@ -20,7 +20,7 @@
                     </div>
                     <i class="fas fa-book text-5xl opacity-70"></i>
                 </div>
-                <a href="{{ route('admin.management_buku') }}"
+                <a href="{{ route('admin.buku.index') }}"
                     class="mt-4 inline-block text-sm text-blue-100 hover:text-white underline">
                     Lihat selengkapnya<i class="fas fa-arrow-right ml-2"></i>
                 </a>
@@ -95,20 +95,29 @@
         <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @forelse($buku as $item)
                 <div class="book-card bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col"
-                     data-title="{{ strtolower($item->judul_buku) }} {{ strtolower($item->kode_buku) }} {{ strtolower($item->kategori->kategori ?? '') }}">
-                    <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover {{ $item->judul_buku }}"
-                        class="w-full h-40 object-cover rounded mb-4">
+                    data-title="{{ strtolower($item->judul_buku) }} {{ strtolower($item->kode_buku) }} {{ strtolower($item->kategori->kategori ?? '') }}">
+                    <div class="relative w-full mb-4" style="padding-top: 150%;"> {{-- 3/2 * 100% = 150% --}}
+                        <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover {{ $item->judul_buku }}"
+                            class="absolute inset-0 w-full h-full object-cover rounded">
+                    </div>
 
                     <h3 class="font-bold text-lg text-gray-800 mb-2">{{ $item->judul_buku }}</h3>
                     <p class="text-sm text-gray-600 mb-1">
                         <i class="fas fa-tag text-blue-500"></i>
                         {{ $item->kategori->kategori ?? '-' }}
                     </p>
-                    <p class="text-sm text-gray-600 mb-4">
+                    <p class="text-sm text-gray-600 mb-1">
                         <i class="fas fa-calendar text-green-500"></i>
                         {{ $item->tahun_terbit->format('Y') }}
                     </p>
-
+                    <p class="text-sm text-gray-600 mb-1">
+                        <i class="fas fa-cubes text-purple-500"></i>
+                        Stok: {{ $item->stokHarga->stok ?? '-' }}
+                    </p>
+                    <p class="text-sm text-gray-600 mb-4">
+                        <i class="fas fa-dollar-sign text-yellow-500"></i>
+                        Harga: {{ $item->stokHarga ? 'Rp ' . number_format($item->stokHarga->harga, 0, ',', '.') : '-' }}
+                    </p>
                     <button onclick="showDetail({{ $item->id }})"
                         class="cursor-pointer mt-auto w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg shadow transition">
                         Detail
@@ -132,7 +141,7 @@
                 title: `<h2 class="text-xl font-bold text-gray-800 mb-4">${item.judul_buku}</h2>`,
                 html: `
                 <div class="flex flex-col md:flex-row items-start gap-6">
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 aspect-[2/3]">
                         <img src="/storage/${item.cover_buku}" 
                              class="w-40 h-56 object-cover rounded-lg shadow-md border">
                     </div>
@@ -144,6 +153,8 @@
                         <p><i class="fas fa-tags text-indigo-600"></i> <b>Kategori:</b> ${item.kategori ? item.kategori.kategori : '-'}</p>
                         <p><i class="fas fa-list text-indigo-600"></i> <b>Jenis :</b> ${item.kategori ? item.kategori.jenis : '-'}</p>
                         <p><i class="fas fa-calendar text-indigo-600"></i> <b>Tahun Terbit:</b> ${new Date(item.tahun_terbit).getFullYear()}</p>
+                        <p><i class="fas fa-cubes text-indigo-600"></i> <b>Stok:</b> ${item.stok_harga ? item.stok_harga.stok : '-'}</p>
+                        <p><i class="fas fa-dollar-sign text-indigo-600"></i> <b>Harga:</b> ${item.stok_harga ? 'Rp ' + new Intl.NumberFormat('id-ID').format(item.stok_harga.harga) : '-'}</p>
                     </div>
                 </div>
             `,
@@ -159,7 +170,7 @@
         }
 
         // 🔎 Search Realtime Card
-        document.getElementById("searchCard").addEventListener("keyup", function () {
+        document.getElementById("searchCard").addEventListener("keyup", function() {
             let keyword = this.value.toLowerCase();
             let cards = document.querySelectorAll(".book-card");
 

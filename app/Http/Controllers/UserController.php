@@ -24,12 +24,12 @@ class UserController extends Controller
 
         $kasir = $query->latest()->paginate(10);
 
-        return view('admin.management_kasir', compact('kasir', 'title'));
+        return view('admin.kasir.index', compact('kasir', 'title'));
     }
 
     public function kasirCreate()
     {
-        return view('admin.tambah_kasir');
+        return view('admin.kasir.create');
     }
 
     public function kasirStore(Request $request)

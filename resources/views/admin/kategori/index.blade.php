@@ -3,12 +3,9 @@
 @section('breadcrumb')
     <nav class="text-sm text-gray-600 mb-4" aria-label="breadcrumb">
         <ol class="list-reset flex items-center space-x-2">
-            <li>
-                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a>
-            </li>
+            <li> <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a> </li>
             <li>/</li>
-            <li>
-                <a href="{{ route('admin.kategori.index') }}" class="text-blue-600 hover:underline">Manajemen Kategori</a>
+            <li> <a href="{{ route('admin.kategori.index') }}" class="text-blue-600 hover:underline">Manajemen Kategori</a>
             </li>
         </ol>
     </nav>
@@ -18,42 +15,43 @@
     <div class="container mx-auto px-4 py-6">
         <!-- Header + Tombol Tambah -->
         <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-3">
-            <h1 class="text-2xl font-bold text-gray-800">Manajemen Kategori</h1>
+            <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">Manajemen Kategori</h1>
             <a href="{{ route('admin.kategori.create') }}"
-                class="inline-flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow transition duration-200">
+                class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg shadow-md transition duration-200">
                 <i class="fas fa-plus"></i>
                 <span>Tambah Kategori</span>
             </a>
         </div>
 
         <!-- Tabel Kategori -->
-        <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+        <div class="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
             <table class="min-w-full table-auto border-collapse">
                 <thead class="bg-indigo-600 text-white">
                     <tr>
-                        <th class="px-4 py-3 text-left ">No</th>
-                        <th class="px-4 py-3 text-left ">Kategori</th>
-                        <th class="px-4 py-3 text-left ">Jenis</th>
-                        <th class="px-4 py-3 text-center ">Aksi</th>
+                        <th class="px-4 py-3 text-left font-semibold">No</th>
+                        <th class="px-4 py-3 text-left font-semibold">Kategori</th>
+                        <th class="px-4 py-3 text-left font-semibold">Jenis</th>
+                        <th class="px-4 py-3 text-center font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @forelse($kategori as $namaKategori => $group)
                         <tr class="hover:bg-gray-50 transition">
                             <!-- Nomor urut -->
-                            <td class="px-4 py-3 align-top text-gray-700">{{ $loop->iteration }}</td>
+                            <td class="px-4 py-3 text-gray-700 font-medium">{{ $loop->iteration }}</td>
 
                             <!-- Nama kategori -->
-                            <td class="px-4 py-3 align-top font-semibold text-gray-800">{{ $namaKategori }}</td>
+                            <td class="px-4 py-3 font-semibold text-gray-900">{{ $namaKategori }}</td>
 
                             <!-- Daftar jenis -->
                             <td class="px-4 py-3" colspan="2">
                                 <div x-data="{ open: false }" class="space-y-2">
                                     <!-- Trigger -->
                                     <button @click="open = !open"
-                                        class="flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition">
+                                        class="cursor-pointer flex items-center text-indigo-600 hover:text-indigo-800 font-medium transition group">
                                         <!-- Ikon caret -->
-                                        <i :class="open ? 'fas fa-caret-down' : 'fas fa-caret-right'" class="mr-1"></i>
+                                        <i :class="open ? 'fas fa-caret-down rotate-90' : 'fas fa-caret-right'"
+                                            class="mr-2 transform transition-transform duration-300"></i>
                                         <span>{{ $group->count() }} Jenis</span>
                                     </button>
                                     <!-- List Jenis -->
@@ -67,10 +65,10 @@
                                             <div
                                                 class="flex justify-between items-center bg-gray-50 px-4 py-2 rounded-md shadow-sm hover:bg-gray-100 transition">
                                                 <span class="text-gray-700">{{ $item->jenis }}</span>
-                                                <div class="flex items-center space-x-2">
+                                                <div class="flex items-center gap-2">
                                                     <!-- Tombol Edit -->
                                                     <a href="{{ route('admin.kategori.edit', $item->id) }}"
-                                                        class="inline-flex items-center justify-center w-8 h-8 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow transition">
+                                                        class="flex items-center justify-center w-8 h-8 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow transition">
                                                         <i class="fa fa-edit text-xs"></i>
                                                     </a>
                                                     <!-- Tombol Hapus -->
@@ -81,7 +79,7 @@
                                                         @method('DELETE')
                                                         <button type="button"
                                                             onclick="confirmDelete({{ $item->id }}, '{{ $item->jenis }}')"
-                                                            class="inline-flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow transition cursor-pointer">
+                                                            class="flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow transition cursor-pointer">
                                                             <i class="fa fa-trash text-xs"></i>
                                                         </button>
                                                     </form>
@@ -94,12 +92,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-6 text-center text-gray-500">
-                                <div class="flex flex-col items-center space-y-2">
-                                    <i class="fas fa-folder-open text-3xl text-gray-400"></i>
-                                    <p class="text-gray-600">Belum ada kategori ❗</p>
+                            <td colspan="4" class="px-4 py-10 text-center text-gray-500">
+                                <div class="flex flex-col items-center space-y-3">
+                                    <i class="fas fa-folder-open text-5xl text-gray-300"></i>
+                                    <p class="text-lg text-gray-600 font-medium">Belum ada kategori ❗</p>
                                     <a href="{{ route('admin.kategori.create') }}"
-                                        class="inline-flex items-center space-x-2 text-indigo-600 hover:text-indigo-800 font-medium transition">
+                                        class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium transition">
                                         <i class="fas fa-plus"></i>
                                         <span>Tambah kategori pertama</span>
                                     </a>

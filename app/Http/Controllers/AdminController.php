@@ -25,11 +25,11 @@ class AdminController extends Controller
     }
     public function management_buku()
     {
-        return view('admin.management_buku');
+        return view('admin.buku.index');
     }
     public function management_kasir()
     {
-        return view('admin.management_kasir');
+        return view('admin.kasir.index');
     }
     public function riwayat_transaksi()
     {

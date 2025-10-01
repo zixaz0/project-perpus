@@ -31,4 +31,8 @@ class Buku extends Model
     {
         return $this->belongsTo(Kategori::class, 'kategori_id');
     }
+    public function stokHarga()
+    {
+        return $this->hasOne(StokHarga::class, 'buku_id');
+    }
 }

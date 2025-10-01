@@ -49,27 +49,32 @@
             @if (Auth::check() && Auth::user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
-                   hover:bg-indigo-50 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-tachometer-alt"></i> Dashboard Admin
                 </a>
-                <a href="{{ route('admin.management_buku') }}"
+                <a href="{{ route('admin.buku.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
-                   hover:bg-indigo-50 {{ request()->routeIs('admin.management_buku') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book"></i> Management Buku
                 </a>
-                <a href="{{ route('admin.management_kasir') }}"
+                <a href="{{ route('admin.stok_harga.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
-                   hover:bg-indigo-50 {{ request()->routeIs('admin.management_kasir') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
-                    <i class="fas fa-users"></i> Management Kasir
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.stok_harga.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    <i class="fas fa-dollar"></i> Stok & Harga
                 </a>
                 <a href="{{ route('admin.kategori.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
-                   hover:bg-indigo-50 {{ request()->routeIs('admin.kategori.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.kategori.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-tags"></i> Manajemen Kategori
+                </a>
+                <a href="{{ route('admin.kasir.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition 
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.kasir.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    <i class="fas fa-users"></i> Management Kasir
                 </a>
                 <a href="{{ route('admin.riwayat_transaksi') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
-                   hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-history"></i> Riwayat Transaksi
                 </a>
             @endif
@@ -77,19 +82,23 @@
             {{-- ✅ Menu Kasir --}}
             @if (Auth::check() && Auth::user()->role === 'kasir')
                 <a href="{{ route('kasir.dashboard') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('kasir.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-cash-register"></i> Dashboard Kasir
                 </a>
-                <a href="{{ route('kasir.data_buku') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                <a href="{{ route('kasir.buku.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('kasir.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book"></i> Data Buku
                 </a>
-                <a href="{{ route('kasir.transaksi') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                <a href="{{ route('kasir.transaksi.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('kasir.transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-credit-card"></i> Transaksi
                 </a>
                 <a href="{{ route('kasir.riwayat_transaksi') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-history"></i> Riwayat Transaksi
                 </a>
             @endif
@@ -97,19 +106,23 @@
             {{-- ✅ Menu Owner --}}
             @if (Auth::check() && Auth::user()->role === 'owner')
                 <a href="{{ route('owner.dashboard') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('owner.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-user-tie"></i> Dashboard Owner
                 </a>
                 <a href="{{ route('owner.data_buku') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('owner.data_buku') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book"></i> Data Buku
                 </a>
                 <a href="{{ route('owner.data_pegawai') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('owner.data_pegawai') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-users"></i> Data Pegawai
                 </a>
                 <a href="{{ route('owner.laporan_penjualan') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50">
+                    class="flex items-center gap-3 p-3 rounded-lg transition
+                       hover:bg-indigo-50 {{ request()->routeIs('owner.laporan_penjualan') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-chart-bar"></i> Laporan Penjualan
                 </a>
             @endif
@@ -121,7 +134,7 @@
                 <form id="logout-form" action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="button" onclick="confirmLogout()"
-                        class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition">
+                        class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium transition cursor-pointer">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </button>
                 </form>
@@ -177,7 +190,7 @@
                             @csrf
                             <button type="button" onclick="confirmLogout()"
                                 class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer">
-                                <i class="fas fa-sign-out-alt mr-2"></i> Logout
+                                <i class="fas fa-sign-out-alt mr-2 cursor-pointer"></i> Logout
                             </button>
                         </form>
                     </div>
@@ -214,30 +227,29 @@
         updateDateTime();
     </script>
 
-    <script>
-        // ✅ SweetAlert sukses setelah redirect
-        @if (session('success'))
-            Swal.fire({
-                title: 'Berhasil!',
-                text: "{{ session('success') }}",
-                icon: 'success',
-                confirmButtonColor: '#3085d6',
-                confirmButtonText: 'OK'
-            });
-        @endif
-        @if (session('error'))
-            Swal.fire({
-                title: 'Gagal!',
-                text: "{{ session('error') }}",
-                icon: 'error',
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'OK'
-            });
-        @endif
-    </script>
-    <script>
+<script>
+    @if (session('success'))
+        Swal.fire({
+            title: 'Berhasil!',
+            text: @json(session('success')), // ✅ aman, langsung jadi string JS
+            icon: 'success',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'OK'
+        });
+    @endif
 
+    @if (session('error'))
+        Swal.fire({
+            title: 'Gagal!',
+            text: @json(session('error')), // ✅ aman juga
+            icon: 'error',
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'OK'
+        });
+    @endif
+</script>
 
+    <script>
         function showProfile() {
             Swal.fire({
                 title: 'Profil Saya',
