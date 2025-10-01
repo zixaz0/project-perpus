@@ -32,7 +32,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/buku.index', [BukuController::class, 'index'])->name('admin.buku.index');
     Route::get('/admin/kasir.index', [UserController::class, 'KasirIndex'])->name('admin.kasir.index');
-    Route::get('/admin/riwayat_transaksi', [AdminController::class, 'riwayat_transaksi'])->name('admin.riwayat_transaksi');
+    Route::get('/admin/riwayat_transaksi.index', [AdminController::class, 'riwayat_transaksi'])->name('admin.riwayat_transaksi.index');
     // Buku
     Route::resource('buku', BukuController::class)->names('admin.buku');
     Route::get('/buku/{id}/edit', [BukuController::class, 'edit'])->name('buku.edit');
@@ -80,7 +80,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':kasir'])->prefix('kasir')->
     Route::get('/buku', [BukuController::class, 'indexkasir'])->name('buku.index');
 
     // Riwayat Transaksi
-    Route::get('/riwayat_transaksi', [KasirController::class, 'riwayat_transaksi'])->name('riwayat_transaksi');
+    Route::get('/riwayat_transaksi.index', [KasirController::class, 'riwayat_transaksi'])->name('riwayat_transaksi.index');
 
     // Transaksi / Keranjang
     Route::prefix('transaksi')->name('transaksi.')->group(function () {

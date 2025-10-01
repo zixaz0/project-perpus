@@ -24,12 +24,10 @@
         <!-- Filter & Search -->
         <div class="flex flex-wrap items-center justify-between mb-4 gap-3">
             <form action="{{ route('kasir.buku.index') }}" method="GET" class="flex flex-wrap items-center gap-2">
-                <!-- Search -->
                 <input type="text" id="searchCard" name="q" value="{{ request('q') }}"
                     placeholder="Cari judul / kode..."
                     class="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-                <!-- Dropdown kategori -->
                 <select name="kategori_id"
                     class="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <option value="">Semua Kategori</option>
@@ -45,7 +43,6 @@
                     @endforeach
                 </select>
 
-                <!-- Tombol cari -->
                 <button type="submit"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md cursor-pointer">
                     <i class="fa fa-search"></i>
@@ -61,8 +58,7 @@
                 <div class="book-card bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col"
                     data-title="{{ strtolower($item->judul_buku) }} {{ strtolower($item->kode_buku) }} {{ strtolower($item->kategori->kategori ?? '') }}">
 
-                    <!-- 📚 Cover Buku dengan rasio 2:3 -->
-                    <div class="relative w-full mb-4" style="padding-top: 150%;"> {{-- 3/2 * 100% = 150% --}}
+                    <div class="relative w-full mb-4" style="padding-top: 150%;">
                         <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover {{ $item->judul_buku }}"
                             class="absolute inset-0 w-full h-full object-cover rounded">
                     </div>
@@ -79,7 +75,6 @@
                         {{ $item->tahun_terbit->format('Y') }}
                     </p>
 
-                    <!-- Stok & Harga ringkas -->
                     <p class="text-sm text-gray-600 mb-1">
                         <i class="fas fa-cubes text-purple-500"></i>
                         Stok: {{ $item->stokHarga->stok ?? '-' }}
@@ -91,34 +86,31 @@
 
                     <!-- Tombol Aksi -->
                     <div class="mt-auto flex gap-2">
-                        <!-- Detail -->
                         <button onclick="showDetail({{ $item->id }})"
                             class="w-1/2 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg shadow transition cursor-pointer">
-                            Detail
+                            <i class="fas fa-eye"></i>
                         </button>
 
-                        <!-- ✅ Keranjang / Qty -->
                         @if (!$inCart)
-                            <form action="{{ route('kasir.transaksi.add', $item->id) }}" method="POST" class="w-1/2">
+                            <form action="{{ route('kasir.transaksi.add', $item->id) }}" method="POST"
+                                class="w-1/2 add-cart-form">
                                 @csrf
                                 <button type="submit"
                                     class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg shadow transition cursor-pointer">
-                                    + Keranjang
+                                    <i class="fas fa-cart-plus"></i>
                                 </button>
                             </form>
                         @else
-                        <form action="{{ route('kasir.transaksi.update', $item->id) }}" method="POST" class="flex w-1/2 border rounded overflow-hidden">
-                            @csrf
-                            @method('PATCH')
-                            <!-- Tombol minus -->
-                            <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] - 1 }}" class="px-3 bg-gray-100 cursor-pointer">−</button>
-                        
-                            <!-- Qty display -->
-                            <span class="flex-1 text-center py-2">{{ $cart[$item->id]['qty'] }}</span>
-                        
-                            <!-- Tombol plus -->
-                            <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] + 1 }}" class="px-3 bg-gray-100 cursor-pointer">+</button>
-                        </form>                        
+                            <form action="{{ route('kasir.transaksi.update', $item->id) }}" method="POST"
+                                class="flex w-1/2 border rounded overflow-hidden update-cart-form">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] - 1 }}"
+                                    class="px-3 bg-gray-100 cursor-pointer">−</button>
+                                <span class="flex-1 text-center py-2">{{ $cart[$item->id]['qty'] }}</span>
+                                <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] + 1 }}"
+                                    class="px-3 bg-gray-100 cursor-pointer">+</button>
+                            </form>
                         @endif
                     </div>
                 </div>
@@ -127,13 +119,24 @@
             @endforelse
         </div>
 
-        <!-- Modal Detail Buku & helpers JS -->
+        <!-- Checkout Button (Sticky) -->
+        <div id="checkoutButton" class="hidden fixed bottom-6 right-6 z-50">
+            <a href="{{ route('kasir.transaksi.index') }}"
+                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="checkoutInfo">Checkout</span>
+            </a>
+        </div>
+
+        <!-- JS Data -->
+        @php
+            $bukuJSON = json_encode($buku);
+            $cartJSON = json_encode($cart);
+        @endphp
+
         <script>
-            @if (method_exists($buku, 'items'))
-                const buku = @json($buku->items());
-            @else
-                const buku = @json($buku);
-            @endif
+            const buku = {!! $bukuJSON !!};
+            const cart = {!! $cartJSON !!};
 
             function showDetail(id) {
                 let item = buku.find(b => b && (b.id === id || String(b.id) === String(id)));
@@ -174,7 +177,7 @@
                 });
             }
 
-            // 🔎 Search Realtime Card
+            // 🔎 Search realtime
             document.getElementById("searchCard").addEventListener("keyup", function() {
                 let keyword = this.value.toLowerCase();
                 document.querySelectorAll(".book-card").forEach(card => {
@@ -182,6 +185,23 @@
                     card.style.display = text.includes(keyword) ? "flex" : "none";
                 });
             });
+
+            // ✅ Update Checkout Button
+            function updateCheckoutButton() {
+                const btn = document.getElementById("checkoutButton");
+                const info = document.getElementById("checkoutInfo");
+                const qty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+                const total = Object.values(cart).reduce((sum, item) => sum + (item.harga ?? 0) * item.qty, 0);
+
+                if (qty > 0) {
+                    btn.classList.remove("hidden");
+                    info.innerText = `Checkout (${qty} item - Rp ${new Intl.NumberFormat('id-ID').format(total)})`;
+                } else {
+                    btn.classList.add("hidden");
+                }
+            }
+
+            updateCheckoutButton();
         </script>
     </div>
 @endsection

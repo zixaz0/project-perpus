@@ -91,11 +91,6 @@
                        hover:bg-indigo-50 {{ request()->routeIs('kasir.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book"></i> Data Buku
                 </a>
-                <a href="{{ route('kasir.transaksi.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition
-                       hover:bg-indigo-50 {{ request()->routeIs('kasir.transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
-                    <i class="fas fa-credit-card"></i> Transaksi
-                </a>
                 <a href="{{ route('kasir.riwayat_transaksi') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition
                        hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
