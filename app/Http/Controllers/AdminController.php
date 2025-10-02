@@ -33,6 +33,6 @@ class AdminController extends Controller
     }
     public function riwayat_transaksi()
     {
-        return view('admin.riwayat_transaksi');
+        return view('admin.riwayat_transaksi.index');
     }
 }

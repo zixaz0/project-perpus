@@ -20,7 +20,7 @@
 
 @section('content')
     <div class="container mx-auto px-6 py-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-6">Keranjang Belanja</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-6"><i class="fas fa-cart-shopping text-indigo-600"></i> Keranjang Belanja</h1>
 
         @if (empty($cart))
             <div class="p-6 bg-blue-100 text-blue-600 rounded-lg">

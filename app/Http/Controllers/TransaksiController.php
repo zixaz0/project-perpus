@@ -173,4 +173,12 @@ class TransaksiController extends Controller
 
         return back();
     }
+    public function riwayat()
+    {
+        $transaksis = Transaksi::with(['kasir', 'items.buku'])
+            ->latest()
+            ->paginate(10);
+
+        return view('kasir.riwayat_transaksi.index', compact('transaksis'));
+    }
 }

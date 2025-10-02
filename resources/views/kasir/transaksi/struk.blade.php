@@ -19,74 +19,80 @@
                 display: none !important;
             }
         }
-
-        /* Styling struk */
-        #print-area {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        #print-area h2 {
-            font-size: 18px;
-            letter-spacing: 1px;
-        }
-        .divider {
-            border-top: 1px dashed #000;
-            margin: 6px 0;
-        }
-        .totals p {
-            display: flex;
-            justify-content: space-between;
-        }
     </style>
 
-    <div id="print-area" class="max-w-sm mx-auto bg-white p-6 shadow">
+    <div id="print-area" class="bg-white p-4 shadow max-w-xs mx-auto font-mono text-sm leading-snug">
         <!-- Header -->
-        <div class="text-center mb-2">
-            <h2 class="font-bold">Buku Kita</h2>
-            <p>Jl. Jend. Sudirman No. 123</p>
-            <p>Kasir: {{ $transaksi->kasir->name }}</p>
-            <p>{{ now()->format('d/m/Y H:i') }}</p>
+        <div class="text-center mb-3">
+            <h2 class="text-lg font-bold tracking-wide">Buku Kita</h2>
+            <p class="text-xs">Jl. Jend. Sudirman No. 123</p>
+            <p class="text-xs">Kasir: {{ $transaksi->kasir->name }}</p>
+            <p class="text-xs">{{ $transaksi->created_at->format('d/m/Y H:i') }}</p>
         </div>
 
-        <div class="divider"></div>
+        <div class="border-t border-dashed border-gray-800 my-2"></div>
 
         <!-- Items -->
-        <table class="w-full text-sm">
-            @foreach ($transaksi->items as $item)
-                <tr>
-                    <td colspan="3">{{ $item->buku->judul_buku }}</td>
-                </tr>
-                <tr>
-                    <td class="pl-2">x{{ $item->qty }}</td>
-                    <td class="text-right">Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
-                </tr>
-            @endforeach
-        </table>
+        @foreach ($transaksi->items as $item)
+            <div>
+                <p class="font-semibold">{{ $item->buku->judul_buku }}</p>
+                <div class="flex justify-between text-xs">
+                    <span>x{{ $item->qty }} @ Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</span>
+                    <span>Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                </div>
+            </div>
+        @endforeach
 
-        <div class="divider"></div>
+        <div class="border-t border-dashed border-gray-800 my-2"></div>
 
         <!-- Totals -->
-        <div class="totals text-sm">
-            <p><span>Total</span> <span>Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}</span></p>
-            <p><span>Diskon</span> <span>- Rp {{ number_format($transaksi->diskon, 0, ',', '.') }}</span></p>
-            <p><span>Subtotal</span> <span>Rp {{ number_format($transaksi->subtotal, 0, ',', '.') }}</span></p>
-            <p><span>Dibayar</span> <span>Rp {{ number_format($transaksi->dibayar, 0, ',', '.') }}</span></p>
-            <p><span>Kembalian</span> <span>Rp {{ number_format($transaksi->kembalian, 0, ',', '.') }}</span></p>
-            <p><span>Metode</span> <span>{{ strtoupper($transaksi->metode_bayar) }}</span></p>
+        <div class="space-y-1 text-xs">
+            <div class="flex justify-between">
+                <span>Total</span>
+                <span>Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Diskon</span>
+                <span>- Rp {{ number_format($transaksi->diskon, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between font-semibold">
+                <span>Subtotal</span>
+                <span>Rp {{ number_format($transaksi->subtotal, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Dibayar</span>
+                <span>Rp {{ number_format($transaksi->dibayar, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Kembalian</span>
+                <span>Rp {{ number_format($transaksi->kembalian, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Metode</span>
+                <span>{{ strtoupper($transaksi->metode_bayar) }}</span>
+            </div>
         </div>
 
-        <div class="divider"></div>
+        <div class="border-t border-dashed border-gray-800 my-2"></div>
 
         <!-- Footer -->
-        <p class="text-center mt-2">~~ Terima kasih ~~</p>
-        <p class="text-center">Barang yang sudah dibeli <br> tidak dapat dikembalikan</p>
+        <div class="text-center mt-3 text-xs">
+            <p>~~ Terima kasih ~~</p>
+            <p class="italic">Barang yang sudah dibeli<br>tidak dapat dikembalikan</p>
+        </div>
     </div>
 
-    <div class="flex justify-center mt-4 no-print">
-        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
-            <i class="fas fa-print mr-2 bg-blue-600"></i> Cetak Struk
+    <div class="flex justify-center gap-3 mt-4 no-print">
+        <!-- Tombol Cetak -->
+        <button onclick="window.print()" 
+            class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded flex items-center gap-2">
+            <i class="fas fa-print"></i> Cetak Struk
         </button>
+
+        <!-- Tombol Kembali -->
+        <a href="{{ route('kasir.buku.index') }}" 
+            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
     </div>
 @endsection

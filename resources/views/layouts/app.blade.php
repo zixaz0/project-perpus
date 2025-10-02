@@ -15,6 +15,7 @@
 
     <!-- Tailwind via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -65,16 +66,16 @@
                 <a href="{{ route('admin.kategori.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
                        hover:bg-indigo-50 {{ request()->routeIs('admin.kategori.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
-                    <i class="fas fa-tags"></i> Manajemen Kategori
+                    <i class="fas fa-tags"></i> Management Kategori
                 </a>
                 <a href="{{ route('admin.kasir.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
                        hover:bg-indigo-50 {{ request()->routeIs('admin.kasir.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-users"></i> Management Kasir
                 </a>
-                <a href="{{ route('admin.riwayat_transaksi') }}"
+                <a href="{{ route('admin.riwayat_transaksi.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
-                       hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-history"></i> Riwayat Transaksi
                 </a>
             @endif
@@ -89,11 +90,11 @@
                 <a href="{{ route('kasir.buku.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition
                        hover:bg-indigo-50 {{ request()->routeIs('kasir.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
-                    <i class="fas fa-book"></i> Data Buku
+                    <i class="fas fa-book"></i> Transaksi
                 </a>
-                <a href="{{ route('kasir.riwayat_transaksi') }}"
+                <a href="{{ route('kasir.riwayat_transaksi.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition
-                       hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-history"></i> Riwayat Transaksi
                 </a>
             @endif

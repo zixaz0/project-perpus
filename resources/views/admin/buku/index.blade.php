@@ -164,40 +164,76 @@
             if (!item) return;
 
             Swal.fire({
-                title: `<h2 class="text-xl font-bold text-gray-800 mb-4">${item.judul_buku}</h2>`,
-                html: `
-                <div class="flex flex-col md:flex-row gap-6 items-start">
-                    <!-- Cover -->
-                    <div class="flex-shrink-0 mx-auto md:mx-0">
-                        <img src="/storage/${item.cover_buku}" 
-                             class="w-40 h-56 object-cover rounded-lg shadow-md border">
-                    </div>
-
-                    <!-- Detail -->
-                    <div class="text-left space-y-3 text-sm md:text-base">
-                        <p><i class="fas fa-barcode text-indigo-600"></i> 
-                           <b>Kode:</b> ${item.kode_buku}</p>
-                        <p><i class="fas fa-building text-indigo-600"></i> 
-                           <b>Penerbit:</b> ${item.penerbit}</p>
-                        <p><i class="fas fa-user text-indigo-600"></i> 
-                           <b>Pengarang:</b> ${item.pengarang}</p>
-                           <p><i class="fas fa-tags text-indigo-600"></i> 
-                              <b>Kategori:</b> ${item.kategori ? item.kategori.kategori : '-'}</p>
-                           <p><i class="fas fa-list text-indigo-600"></i> 
-                              <b>Jenis :</b> ${item.kategori ? item.kategori.jenis : '-'}</p>
-                           <p><i class="fas fa-calendar text-indigo-600"></i> 
-                           <b>Tahun Terbit:</b> ${new Date(item.tahun_terbit).getFullYear()}</p>
-                    </div>
-                </div>
-            `,
-                width: 700,
+                width: 750,
+                padding: "1.5rem",
+                background: "#f9fafb",
                 showCloseButton: true,
                 confirmButtonText: "Tutup",
                 confirmButtonColor: "#2563eb",
-                background: "#f9fafb",
                 customClass: {
-                    popup: 'rounded-2xl shadow-lg p-6'
-                }
+                    popup: 'rounded-2xl shadow-xl p-6'
+                },
+                html: `
+        <div class="flex flex-col md:flex-row gap-6 items-start">
+            
+            <!-- Cover Buku -->
+            <div class="flex-shrink-0 mx-auto md:mx-0">
+                <img src="/storage/${item.cover_buku}" 
+                     class="w-44 h-64 object-cover rounded-xl shadow-lg border border-gray-200">
+            </div>
+
+            <!-- Detail Buku -->
+            <div class="flex-1 text-left space-y-4">
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+                    ${item.judul_buku}
+                </h2>
+
+                <!-- Grid 2 Kolom -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm md:text-base text-gray-700">
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-barcode text-indigo-600"></i> 
+                        <span><b>Kode:</b> ${item.kode_buku}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-cubes text-indigo-600"></i> 
+                        <span><b>Stok:</b> ${item.stok_harga ? item.stok_harga.stok + " pcs" : '-'}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-building text-indigo-600"></i> 
+                        <span><b>Penerbit:</b> ${item.penerbit}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-dollar-sign text-indigo-600"></i> 
+                        <span><b>Harga:</b> ${item.stok_harga ? 'Rp ' + new Intl.NumberFormat('id-ID').format(item.stok_harga.harga) : '-'}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-user text-indigo-600"></i> 
+                        <span><b>Pengarang:</b> ${item.pengarang}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-calendar text-indigo-600"></i> 
+                        <span><b>Tahun Terbit:</b> ${new Date(item.tahun_terbit).getFullYear()}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-tags text-indigo-600"></i> 
+                        <span><b>Kategori:</b> ${item.kategori ? item.kategori.kategori : '-'}</span>
+                    </p>
+
+                    <p class="flex items-center gap-2">
+                        <i class="fas fa-list text-indigo-600"></i> 
+                        <span><b>Jenis:</b> ${item.kategori ? item.kategori.jenis : '-'}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    `
             });
         }
     </script>

@@ -92,8 +92,8 @@ class BukuController extends Controller
             'tahun_terbit' => 'required|date',
             'kategori_id'  => 'required|exists:kategori,id',
             'cover_buku'   => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-            'stok'         => 'required|integer|min:0',
-            'harga'        => 'required|numeric|min:0',
+            'stok'  => 'nullable|integer|min:0',
+            'harga' => 'nullable|numeric|min:0',
         ]);
 
         $kategori = Kategori::findOrFail($request->kategori_id);
@@ -118,10 +118,10 @@ class BukuController extends Controller
         $buku = Buku::create($data);
 
         // Simpan stok & harga
-        StokHarga::create([
-            'buku_id' => $buku->id,
-            'stok'    => $request->stok,
-            'harga'   => $request->harga,
+            StokHarga::create([
+                'buku_id' => $buku->id,
+                'stok'    => $request->stok ?? 0,
+                'harga'   => $request->harga ?? 0,
         ]);
 
         return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil ditambahkan dengan kode: ' . $kode_buku);
@@ -131,7 +131,7 @@ class BukuController extends Controller
     {
         $buku = Buku::with('stokHarga')->findOrFail($id);
         $kategori = Kategori::all();
-        return view('admin.edit_buku', compact('buku', 'kategori'));
+        return view('admin.buku.edit', compact('buku', 'kategori'));
     }
 
     public function update(Request $request, $id)
@@ -144,8 +144,8 @@ class BukuController extends Controller
                 'kategori_id'  => 'required|exists:kategori,id',
                 'tahun_terbit' => 'required|date',
                 'cover_buku'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-                'stok'         => 'required|integer|min:0',
-                'harga'        => 'required|numeric|min:0',
+                'stok'  => 'nullable|integer|min:0',
+                'harga' => 'nullable|numeric|min:0',
             ]);
 
             $buku = Buku::findOrFail($id);

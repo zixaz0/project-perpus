@@ -80,7 +80,10 @@ Route::middleware(['auth', RoleMiddleware::class . ':kasir'])->prefix('kasir')->
     Route::get('/buku', [BukuController::class, 'indexkasir'])->name('buku.index');
 
     // Riwayat Transaksi
-    Route::get('/riwayat_transaksi.index', [KasirController::class, 'riwayat_transaksi'])->name('riwayat_transaksi.index');
+// Riwayat Transaksi
+Route::get('/riwayat-transaksi', [TransaksiController::class, 'riwayat'])
+    ->name('riwayat_transaksi.index');
+
 
     // Transaksi / Keranjang
     Route::prefix('transaksi')->name('transaksi.')->group(function () {
