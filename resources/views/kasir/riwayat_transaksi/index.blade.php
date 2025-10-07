@@ -7,7 +7,7 @@
                 <a href="{{ route('kasir.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a>
             </li>
             <li>/</li>
-            <li class="text-gray-700">Riwayat Transaksi</li>
+            <a href="" class="text-blue-600 hover:underline">Riwayat Transaksi</a>
         </ol>
     </nav>
 @endsection

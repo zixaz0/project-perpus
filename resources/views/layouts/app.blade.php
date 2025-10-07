@@ -263,7 +263,7 @@
                 <!-- Icon pensil -->
                 <button type="button"
                     onclick="document.getElementById('inputFoto').click()"
-                    class="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow opacity-0 group-hover:opacity-100 transition">
+                    class="cursor-pointer absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow opacity-0 group-hover:opacity-100 transition">
                     <i class="fas fa-pencil-alt text-xs"></i>
                 </button>
             </div>
@@ -296,11 +296,11 @@
 
                     btnWrapper.innerHTML = `
             <button type="button" id="btnKembali"
-                class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                class=" cursor-pointer flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                 Kembali
             </button>
             <button type="button" id="btnSimpan"
-                class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden">
+                class="cursor-pointer flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden">
                 Simpan Perubahan
             </button>
         `;

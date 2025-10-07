@@ -28,8 +28,8 @@
                     placeholder="Cari judul / kode..."
                     class="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
 
-                <select name="kategori_id"
-                    class="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select name="kategori_id" type="submit"
+                    class="cursor-pointer px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     <option value="">Semua Kategori</option>
                     @foreach ($kategori as $group => $items)
                         <optgroup label="{{ $group }}">
