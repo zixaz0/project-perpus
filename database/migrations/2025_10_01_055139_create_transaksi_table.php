@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->decimal('subtotal', 12, 2);
             $table->decimal('dibayar', 12, 2)->nullable();
             $table->decimal('kembalian', 12, 2)->nullable();
-            $table->enum('metode_bayar', ['cash','qris','debit','credit'])->default('cash');
+            $table->enum('metode_bayar', ['cash','debit'])->default('cash');
             $table->timestamps();
         });
     }

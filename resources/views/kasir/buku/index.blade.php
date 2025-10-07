@@ -119,14 +119,15 @@
                                 </form>
                             @else
                                 <form action="{{ route('kasir.transaksi.update', $item->id) }}" method="POST"
-                                    class="flex w-1/2 border rounded overflow-hidden update-cart-form">
+                                    class="flex w-1/2 border rounded overflow-hidden update-cart-form"
+                                    data-stok="{{ $stok }}">
                                     @csrf
                                     @method('PATCH')
                                     <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] - 1 }}"
                                         class="px-3 bg-gray-100 cursor-pointer">−</button>
                                     <span class="flex-1 text-center py-2">{{ $cart[$item->id]['qty'] }}</span>
                                     <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] + 1 }}"
-                                        class="px-3 bg-gray-100 cursor-pointer">+</button>
+                                        class="px-3 bg-gray-100 cursor-pointer btn-plus">+</button>
                                 </form>
                             @endif
                         @else
@@ -188,6 +189,27 @@
         }
         updateCheckoutButton();
 
+        // ✅ Batasi qty agar tidak melebihi stok
+        document.querySelectorAll(".update-cart-form").forEach(form => {
+            form.addEventListener("submit", function(e) {
+                const stok = parseInt(this.dataset.stok);
+                const plusButton = this.querySelector(".btn-plus");
+                const currentQty = parseInt(this.querySelector("span").innerText);
+
+                // Jika tombol "+" ditekan dan qty sudah = stok, blokir submit
+                if (document.activeElement === plusButton && currentQty >= stok) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Stok terbatas!",
+                        text: `Jumlah tidak boleh melebihi stok (${stok}).`,
+                        confirmButtonColor: "#2563eb"
+                    });
+                }
+            });
+        });
+
+        // ✅ Detail buku (popup SweetAlert)
         function showDetail(id) {
             const buku = @json($buku->items());
             let item = buku.find(b => b.id === id);
@@ -205,61 +227,23 @@
                 },
                 html: `
             <div class="flex flex-col md:flex-row gap-6 items-start">
-                
-                <!-- Cover Buku -->
                 <div class="flex-shrink-0 mx-auto md:mx-0">
                     <img src="/storage/${item.cover_buku}" 
                          class="w-44 h-64 object-cover rounded-xl shadow-lg border border-gray-200">
                 </div>
-
-                <!-- Detail Buku -->
                 <div class="flex-1 text-left space-y-4">
                     <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
                         ${item.judul_buku}
                     </h2>
-
-                    <!-- Grid 2 Kolom -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm md:text-base text-gray-700">
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-barcode text-indigo-600"></i> 
-                            <span><b>Kode:</b> ${item.kode_buku}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-cubes text-indigo-600"></i> 
-                            <span><b>Stok:</b> ${item.stok_harga ? item.stok_harga.stok + " pcs" : '-'}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-building text-indigo-600"></i> 
-                            <span><b>Penerbit:</b> ${item.penerbit}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-dollar-sign text-indigo-600"></i> 
-                            <span><b>Harga:</b> ${item.stok_harga ? 'Rp ' + new Intl.NumberFormat('id-ID').format(item.stok_harga.harga) : '-'}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-user text-indigo-600"></i> 
-                            <span><b>Pengarang:</b> ${item.pengarang}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-calendar text-indigo-600"></i> 
-                            <span><b>Tahun Terbit:</b> ${new Date(item.tahun_terbit).getFullYear()}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-tags text-indigo-600"></i> 
-                            <span><b>Kategori:</b> ${item.kategori ? item.kategori.kategori : '-'}</span>
-                        </p>
-
-                        <p class="flex items-center gap-2">
-                            <i class="fas fa-list text-indigo-600"></i> 
-                            <span><b>Jenis:</b> ${item.kategori ? item.kategori.jenis : '-'}</span>
-                        </p>
+                        <p><i class="fas fa-barcode text-indigo-600"></i> <b>Kode:</b> ${item.kode_buku}</p>
+                        <p><i class="fas fa-cubes text-indigo-600"></i> <b>Stok:</b> ${item.stok_harga ? item.stok_harga.stok + " pcs" : '-'}</p>
+                        <p><i class="fas fa-building text-indigo-600"></i> <b>Penerbit:</b> ${item.penerbit}</p>
+                        <p><i class="fas fa-dollar-sign text-indigo-600"></i> <b>Harga:</b> ${item.stok_harga ? 'Rp ' + new Intl.NumberFormat('id-ID').format(item.stok_harga.harga) : '-'}</p>
+                        <p><i class="fas fa-user text-indigo-600"></i> <b>Pengarang:</b> ${item.pengarang}</p>
+                        <p><i class="fas fa-calendar text-indigo-600"></i> <b>Tahun Terbit:</b> ${new Date(item.tahun_terbit).getFullYear()}</p>
+                        <p><i class="fas fa-tags text-indigo-600"></i> <b>Kategori:</b> ${item.kategori ? item.kategori.kategori : '-'}</p>
+                        <p><i class="fas fa-list text-indigo-600"></i> <b>Jenis:</b> ${item.kategori ? item.kategori.jenis : '-'}</p>
                     </div>
                 </div>
             </div>

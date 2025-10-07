@@ -16,6 +16,22 @@ class TransaksiController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
+        
+        // ✅ Update stok dari database untuk memastikan data terkini
+        foreach ($cart as $buku_id => $item) {
+            $stokHarga = \App\Models\StokHarga::where('buku_id', $buku_id)->first();
+            if ($stokHarga) {
+                $cart[$buku_id]['stok'] = $stokHarga->stok;
+                
+                // Kurangi qty jika melebihi stok
+                if ($item['qty'] > $stokHarga->stok) {
+                    $cart[$buku_id]['qty'] = $stokHarga->stok;
+                }
+            }
+        }
+        
+        session()->put('cart', $cart);
+        
         return view('kasir.transaksi.index', compact('cart'));
     }
 
@@ -43,13 +59,14 @@ class TransaksiController extends Controller
                 'judul_buku' => $buku->judul_buku,
                 'harga'      => $stokHarga->harga,
                 'qty'        => 1,
+                'stok'       => $stokHarga->stok, // ← TAMBAHKAN INI
                 'cover_buku' => $buku->cover_buku ?? null,
             ];
         }
 
         session()->put('cart', $cart);
 
-        return back()->with('success',);
+        return back()->with('success', 'Buku berhasil ditambahkan ke keranjang.'); // ← Perbaiki juga ini
     }
 
     /**
@@ -160,12 +177,19 @@ class TransaksiController extends Controller
         if (isset($cart[$buku->id])) {
             $newQty = (int) $request->qty;
 
+            // ✅ Validasi stok
+            $stokHarga = $buku->stokHarga;
+            if ($newQty > $stokHarga->stok) {
+                return back()->with('error', 'Stok tidak mencukupi.');
+            }
+
             if ($newQty <= 0) {
                 // Kalau qty < 1 hapus item
                 unset($cart[$buku->id]);
             } else {
                 // Update qty normal
                 $cart[$buku->id]['qty'] = $newQty;
+                $cart[$buku->id]['stok'] = $stokHarga->stok; // ← Update stok juga
             }
 
             session()->put('cart', $cart);
