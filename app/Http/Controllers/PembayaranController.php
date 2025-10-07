@@ -11,7 +11,7 @@ class PembayaranController extends Controller
     public function bayar(Request $request)
     {
         // Konfigurasi Midtrans
-        Config::$serverKey = config('Mid-server-O7sn9mE0oBAwHFG5nvaMoTq2');
+        Config::$serverKey = config('MIDTRANS_SERVER_KEY');
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
