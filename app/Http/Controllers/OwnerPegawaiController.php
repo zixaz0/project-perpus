@@ -29,13 +29,13 @@ class OwnerPegawaiController extends Controller
 
         $pegawai = $query->latest()->paginate(10);
 
-        return view('owner.data_pegawai', compact('pegawai', 'title'));
+        return view('owner.pegawai.index', compact('pegawai', 'title'));
     }
 
     // 🔹 Form Tambah Pegawai
     public function create()
     {
-        return view('owner.tambah_pegawai');
+        return view('owner.pegawai.create');
     }
 
     // 🔹 Simpan Pegawai
@@ -72,14 +72,14 @@ class OwnerPegawaiController extends Controller
             'foto'     => $fotoPath,
         ]);
 
-        return redirect()->route('owner.data_pegawai')->with('success', 'Pegawai berhasil ditambahkan!');
+        return redirect()->route('owner.pegawai.index')->with('success', 'Pegawai berhasil ditambahkan!');
     }
 
     // 🔹 Edit Pegawai
     public function edit($id)
     {
         $pegawai = User::whereIn('role', ['admin', 'kasir'])->findOrFail($id);
-        return view('owner.edit_pegawai', compact('pegawai'));
+        return view('owner.pegawai.edit', compact('pegawai'));
     }
 
     // 🔹 Update Pegawai
@@ -114,7 +114,7 @@ class OwnerPegawaiController extends Controller
 
         $pegawai->save();
 
-        return redirect()->route('owner.data_pegawai')->with('success', 'Pegawai berhasil diupdate!');
+        return redirect()->route('owner.pegawai.index')->with('success', 'Pegawai berhasil diupdate!');
     }
 
     // 🔹 Hapus Pegawai
@@ -129,6 +129,6 @@ class OwnerPegawaiController extends Controller
 
         $pegawai->delete();
 
-        return redirect()->route('owner.data_pegawai')->with('success', 'Pegawai berhasil dihapus!');
+        return redirect()->route('owner.pegawai.index')->with('success', 'Pegawai berhasil dihapus!');
     }
 }

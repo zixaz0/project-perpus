@@ -61,9 +61,9 @@
             </div>
 
             <div class="flex justify-end space-x-4 pt-4 border-t">
-                <a href="{{ route('owner.data_pegawai') }}" class="px-5 py-2 bg-gray-200 rounded-lg">Batal</a>
+                <a href="{{ route('owner.pegawai.index') }}" class="px-5 py-2 bg-gray-200 rounded-lg">Batal</a>
                 <button type="button" onclick="confirmEdit()"
-                    class="px-5 py-2 bg-indigo-600 text-white rounded-lg">Update</button>
+                    class="px-5 py-2 bg-indigo-600 text-white rounded-lg cursor-pointer">Update</button>
             </div>
         </form>
     </div>
@@ -89,7 +89,7 @@
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = "{{ route('owner.data_pegawai') }}";
+                    window.location.href = "{{ route('owner.pegawai.index') }}";
                 });
             }
         });

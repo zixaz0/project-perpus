@@ -74,7 +74,7 @@ class BukuController extends Controller
         }
 
         $buku = $query->latest()->paginate(10);
-        return view('owner.data_buku', compact('buku', 'title', 'kategori'));
+        return view('owner.buku.index', compact('buku', 'title', 'kategori'));
     }
 
     public function create()

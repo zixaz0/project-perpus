@@ -10,7 +10,7 @@
                 <form action="{{ route('owner.pegawai.index') }}" method="GET" class="flex">
                     <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama/email..."
                         class="px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-md">
+                    <button type="submit" class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-md">
                         <i class="fa fa-search"></i>
                     </button>
                 </form>
@@ -66,7 +66,7 @@
                                         @method('DELETE')
                                         <button type="button"
                                             onclick="confirmDelete({{ $item->id }}, '{{ $item->name }}')"
-                                            class="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow transition"
+                                            class="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow transition cursor-pointer"
                                             title="Hapus">
                                             <i class="fa fa-trash"></i>
                                         </button>

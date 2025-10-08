@@ -76,7 +76,12 @@
                 <a href="{{ route('admin.riwayat_transaksi.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition 
                        hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
-                    <i class="fas fa-history"></i> Riwayat Transaksi
+                    <i class="fas fa-wallet"></i> Riwayat Transaksi
+                </a>
+                <a href="{{ route('admin.logs.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition 
+                       hover:bg-indigo-50 {{ request()->routeIs('admin.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    <i class="fas fa-clipboard-list"></i> Log Aktivitas
                 </a>
             @endif
 
@@ -95,8 +100,13 @@
                 <a href="{{ route('kasir.riwayat_transaksi.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition
                        hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
-                    <i class="fas fa-history"></i> Riwayat Transaksi
+                    <i class="fas fa-wallet"></i> Riwayat Transaksi
                 </a>
+                <a href="{{ route('kasir.logs.index') }}"
+                class="flex items-center gap-3 p-3 rounded-lg transition 
+                   hover:bg-indigo-50 {{ request()->routeIs('kasir.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                <i class="fas fa-clipboard-list"></i> Log Aktivitas
+            </a>
             @endif
 
             {{-- ✅ Menu Owner --}}
@@ -106,14 +116,14 @@
                        hover:bg-indigo-50 {{ request()->routeIs('owner.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-user-tie"></i> Dashboard Owner
                 </a>
-                <a href="{{ route('owner.data_buku') }}"
+                <a href="{{ route('owner.buku.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition
-                       hover:bg-indigo-50 {{ request()->routeIs('owner.data_buku') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('owner.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book"></i> Data Buku
                 </a>
-                <a href="{{ route('owner.data_pegawai') }}"
+                <a href="{{ route('owner.pegawai.index') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition
-                       hover:bg-indigo-50 {{ request()->routeIs('owner.data_pegawai') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                       hover:bg-indigo-50 {{ request()->routeIs('owner.pegawai.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-users"></i> Data Pegawai
                 </a>
                 <a href="{{ route('owner.laporan_penjualan') }}"
@@ -121,6 +131,11 @@
                        hover:bg-indigo-50 {{ request()->routeIs('owner.laporan_penjualan') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-chart-bar"></i> Laporan Penjualan
                 </a>
+                <a href="{{ route('owner.logs.index') }}"
+                class="flex items-center gap-3 p-3 rounded-lg transition 
+                   hover:bg-indigo-50 {{ request()->routeIs('owner.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                <i class="fas fa-clipboard-list"></i> Log Aktivitas
+            </a>
             @endif
         </nav>
 

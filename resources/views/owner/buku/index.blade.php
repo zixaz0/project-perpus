@@ -6,10 +6,10 @@
             <h1 class="text-2xl font-bold"> Data Buku</h1>
             <div class="flex items-center space-x-3">
                 <!-- Search Bar -->
-                <form action="{{ route('owner.data_buku') }}" method="GET" class="flex">
+                <form action="{{ route('owner.buku.index') }}" method="GET" class="flex">
                     <input type="text" name="qu" value="{{ request('qu') }}" placeholder="Cari judul / kode..."
                         class="px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-md">
+                    <button type="submit" class="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-md">
                         <i class="fa fa-search"></i>
                     </button>
                 </form>

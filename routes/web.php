@@ -15,6 +15,8 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\OwnerPegawaiController;
 use App\Http\Controllers\KasirMidtransController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\KategoriController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::get('/', function () {
@@ -58,9 +60,13 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
         Route::get('/kasir/{id}', [UserController::class, 'show'])->name('kasir.show');
 
         // Kategori
-        Route::resource('kategori', \App\Http\Controllers\KategoriController::class)
+        Route::resource('kategori', KategoriController::class)
             ->names('admin.kategori')
             ->except(['show']);
+        // Activity Log (Admin)
+       
+            Route::get('/logs', [ActivityLogController::class, 'index'])->name('admin.logs.index');
+            Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('admin.logs.show');
     });
 });
 
@@ -69,8 +75,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
 // ===================================================
 Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function () {
     Route::get('/owner', [OwnerController::class, 'index'])->name('owner.dashboard');
-    Route::get('/owner/data_buku', [BukuController::class, 'indexowner'])->name('owner.data_buku');
-    Route::get('/owner/data_pegawai', [OwnerPegawaiController::class, 'index'])->name('owner.data_pegawai');
+    Route::get('/owner/buku/index', [BukuController::class, 'indexowner'])->name('owner.buku.index');
+    Route::get('/owner/pegawai/index', [OwnerPegawaiController::class, 'index'])->name('owner.pegawai.index');
     Route::get('/owner/laporan_penjualan', [OwnerController::class, 'laporan_penjualan'])->name('owner.laporan_penjualan');
     Route::prefix('owner')
         ->name('owner.')
@@ -78,6 +84,11 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
         ->group(function () {
             Route::resource('pegawai', OwnerPegawaiController::class);
         });
+    // Activity Log (Owner)
+    Route::prefix('owner')->group(function () {
+        Route::get('/logs', [ActivityLogController::class, 'index'])->name('owner.logs.index');
+        Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('owner.logs.show');
+    });
 });
 
 Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
@@ -109,4 +120,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
                 Route::get('struk/{id}', [TransaksiController::class, 'struk'])->name('struk');
                 Route::patch('update/{buku}', [TransaksiController::class, 'updateQty'])->name('update');
             });
+            // Activity Log (Kasir)
+            Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+            Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('logs.show');
     });
