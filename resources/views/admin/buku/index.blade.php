@@ -18,7 +18,8 @@
     <div class="container mx-auto px-4 py-6">
         <!-- Header + Tombol Tambah + Search -->
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Manajemen Buku</h1>
+            <h1 class="text-2xl font-bold">
+                <i class="fas fa-book text-indigo-600"></i>Management Buku</h1>
 
             <div class="flex items-center space-x-3">
                 <!-- Form Pencarian & Filter -->
@@ -92,16 +93,22 @@
                                         <div class="flex gap-1">
                                             <!-- Tombol Edit -->
                                             <a href="{{ route('buku.edit', $item->id) }}"
-                                                class="w-9 h-9 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow"
-                                                title="Edit">
+                                                class="group relative w-9 h-9 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow">
                                                 <i class="fa fa-edit text-sm"></i>
+                                                <span
+                                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                    Edit
+                                                </span>
                                             </a>
 
                                             <!-- Tombol Detail -->
                                             <a href="javascript:void(0);" onclick="showDetail({{ $item->id }})"
-                                                class="w-9 h-9 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow"
-                                                title="Detail">
+                                                class="group relative w-9 h-9 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 shadow">
                                                 <i class="fa fa-eye text-sm"></i>
+                                                <span
+                                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                    Detail
+                                                </span>
                                             </a>
                                         </div>
 
@@ -112,9 +119,12 @@
                                             @method('DELETE')
                                             <button type="button"
                                                 onclick="confirmDelete({{ $item->id }}, '{{ $item->judul_buku }}')"
-                                                class="w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow cursor-pointer"
-                                                title="Hapus">
+                                                class="group relative w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow cursor-pointer">
                                                 <i class="fa fa-trash text-sm"></i>
+                                                <span
+                                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                    Hapus
+                                                </span>
                                             </button>
                                         </form>
                                     </div>

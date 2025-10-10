@@ -17,7 +17,9 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Manajemen Kasir</h1>
+        <h1 class="text-2xl font-bold">
+            <i class="fas fa-users text-indigo-600"></i>
+            Manajemen Kasir</h1>
 
         <div class="flex items-center space-x-3">
             <!-- Search Bar -->
@@ -69,9 +71,13 @@
                             <div class="flex justify-center items-center space-x-3">
                                 <!-- Tombol Edit -->
                                 <a href="{{ route('kasir.edit', $item->id) }}"
-                                    class="w-10 h-10 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow transition"
+                                    class="group relative w-10 h-10 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow transition"
                                     title="Edit Kasir">
                                     <i class="fa fa-edit"></i>
+                                    <span
+                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                    Edit
+                                    </span>
                                 </a>
 
                                 <!-- Tombol Hapus -->
@@ -81,9 +87,13 @@
                                     @method('DELETE')
                                     <button type="button"
                                         onclick="confirmDelete({{ $item->id }}, '{{ $item->name }}')"
-                                        class="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow transition cursor-pointer"
+                                        class="group relative w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow transition cursor-pointer"
                                         title="Hapus Kasir">
                                         <i class="fa fa-trash"></i>
+                                        <span
+                                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                        Hapus
+                                        </span>
                                     </button>
                                 </form>
                             </div>

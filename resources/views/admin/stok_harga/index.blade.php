@@ -18,7 +18,9 @@
     <div class="container mx-auto px-4 py-6">
         <!-- Header -->
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Stok & Harga Buku</h1>
+            <h1 class="text-2xl font-bold">
+                <i class="fas fa-dollar text-indigo-600"></i>
+                Stok & Harga Buku</h1>
 
             <!-- Tombol Tambah -->
             <a href="{{ route('admin.stok_harga.create') }}"
@@ -55,11 +57,26 @@
                                 <td class="px-4 py-2">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                                 <td class="px-4 py-2">
                                     <div class="flex gap-2 justify-center">
-                                        <!-- Edit -->
+                                        <!-- Tambah Stok -->
+                                        <a href="{{ route('admin.stok_harga.tambah_stok_form', $item->id) }}"
+                                            class="group relative w-9 h-9 flex items-center justify-center bg-green-500 text-white rounded-full hover:bg-green-600 shadow"
+                                            title="Tambah Stok">
+                                            <i class="fa fa-plus text-sm"></i>
+                                            <span
+                                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                            Tambah Stok
+                                            </span>
+                                        </a>
+
+                                        <!-- Edit Harga -->
                                         <a href="{{ route('admin.stok_harga.edit', $item->id) }}"
-                                            class="w-9 h-9 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow"
-                                            title="Edit">
+                                            class="group relative w-9 h-9 flex items-center justify-center bg-yellow-500 text-white rounded-full hover:bg-yellow-600 shadow"
+                                            title="Edit Harga">
                                             <i class="fa fa-edit text-sm"></i>
+                                            <span
+                                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                            Edit Harga
+                                            </span>
                                         </a>
 
                                         <!-- Hapus -->
@@ -69,9 +86,13 @@
                                             @method('DELETE')
                                             <button type="button"
                                                 onclick="confirmDelete({{ $item->id }}, '{{ $item->buku->judul_buku }}')"
-                                                class="w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow cursor-pointer"
+                                                class="group relative w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-600 shadow cursor-pointer"
                                                 title="Hapus">
                                                 <i class="fa fa-trash text-sm"></i>
+                                                <span
+                                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                Hapus
+                                                </span>
                                             </button>
                                         </form>
                                     </div>
@@ -80,7 +101,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-4 py-3 text-center text-gray-500">
-                                    Tidak ada data stok & harga ❗
+                                    Tidak ada data stok & harga
                                 </td>
                             </tr>
                         @endforelse

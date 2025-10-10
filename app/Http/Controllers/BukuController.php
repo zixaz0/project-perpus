@@ -12,7 +12,7 @@ class BukuController extends Controller
     public function index(Request $request)
     {
         $title = 'Management Buku';
-        $query = Buku::with(['kategori', 'stokHarga']); // load stokHarga juga
+        $query = Buku::with(['kategori', 'stokHarga']);
         $kategori = Kategori::all()->groupBy('kategori');
 
         if ($request->filled('q')) {
@@ -118,10 +118,10 @@ class BukuController extends Controller
         $buku = Buku::create($data);
 
         // Simpan stok & harga
-            StokHarga::create([
-                'buku_id' => $buku->id,
-                'stok'    => $request->stok ?? 0,
-                'harga'   => $request->harga ?? 0,
+        StokHarga::create([
+            'buku_id' => $buku->id,
+            'stok'    => $request->stok ?? 0,
+            'harga'   => $request->harga ?? 0,
         ]);
 
         return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil ditambahkan dengan kode: ' . $kode_buku);
@@ -146,6 +146,17 @@ class BukuController extends Controller
                 'cover_buku'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
                 'stok'  => 'nullable|integer|min:0',
                 'harga' => 'nullable|numeric|min:0',
+            ],
+            [
+                'judul_buku.required' => 'Judul buku harus diisi.',
+                'penerbit.required' => 'Penerbit harus diisi.',
+                'pengarang.required' => 'Pengarang harus diisi.',
+                'kategori_id.required' => 'Kategori harus dipilih.',
+                'tahun_terbit.required' => 'Tahun terbit harus diisi.',
+                'stok.integer' => 'Stok harus berupa angka.',
+                'stok.min' => 'Stok minimal 0.',
+                'harga.numeric' => 'Harga harus berupa angka.',
+                'harga.min' => 'Harga minimal 0.',
             ]);
 
             $buku = Buku::findOrFail($id);

@@ -16,22 +16,22 @@ class TransaksiController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        
+
         // ✅ Update stok dari database untuk memastikan data terkini
         foreach ($cart as $buku_id => $item) {
             $stokHarga = \App\Models\StokHarga::where('buku_id', $buku_id)->first();
             if ($stokHarga) {
                 $cart[$buku_id]['stok'] = $stokHarga->stok;
-                
+
                 // Kurangi qty jika melebihi stok
                 if ($item['qty'] > $stokHarga->stok) {
                     $cart[$buku_id]['qty'] = $stokHarga->stok;
                 }
             }
         }
-        
+
         session()->put('cart', $cart);
-        
+
         return view('kasir.transaksi.index', compact('cart'));
     }
 
@@ -204,5 +204,18 @@ class TransaksiController extends Controller
             ->paginate(10);
 
         return view('kasir.riwayat_transaksi.index', compact('transaksis'));
+    }
+    public function riwayatAdmin()
+    {
+        $transaksis = Transaksi::with(['kasir', 'items.buku'])
+            ->latest()
+            ->paginate(10);
+
+        return view('admin.riwayat_transaksi.index', compact('transaksis'));
+    }
+    public function clear()
+    {
+        session()->forget('cart');
+        return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan!');
     }
 }

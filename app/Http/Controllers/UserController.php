@@ -75,7 +75,7 @@ class UserController extends Controller
     {
         $title = "Edit Kasir";
         $kasir = User::where('role', 'kasir')->findOrFail($id);
-        return view('admin.edit_kasir', compact('kasir', 'title'));
+        return view('admin.kasir.edit', compact('kasir', 'title'));
     }
 
     // 🔹 Update Kasir

@@ -5,7 +5,7 @@
         <ol class="list-reset flex items-center space-x-2">
             <li> <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:underline">Dashboard</a> </li>
             <li>/</li>
-            <li> <a href="{{ route('admin.kategori.index') }}" class="text-blue-600 hover:underline">Manajemen Kategori</a>
+            <li> <a href="{{ route('admin.kategori.index') }}" class="text-blue-600 hover:underline">Management Kategori</a>
             </li>
         </ol>
     </nav>
@@ -15,7 +15,9 @@
     <div class="container mx-auto px-4 py-6">
         <!-- Header + Tombol Tambah -->
         <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-3">
-            <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">Manajemen Kategori</h1>
+            <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">
+                <i class="fas fa-tags text-indigo-600"></i>
+                Management Kategori</h1>
             <a href="{{ route('admin.kategori.create') }}"
                 class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg shadow-md transition duration-200">
                 <i class="fas fa-plus"></i>
@@ -68,8 +70,12 @@
                                                 <div class="flex items-center gap-2">
                                                     <!-- Tombol Edit -->
                                                     <a href="{{ route('admin.kategori.edit', $item->id) }}"
-                                                        class="flex items-center justify-center w-8 h-8 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow transition">
+                                                        class="group relative flex items-center justify-center w-8 h-8 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full shadow transition">
                                                         <i class="fa fa-edit text-xs"></i>
+                                                        <span
+                                                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                        Edit
+                                                        </span>
                                                     </a>
                                                     <!-- Tombol Hapus -->
                                                     <form id="delete-form-{{ $item->id }}"
@@ -79,8 +85,12 @@
                                                         @method('DELETE')
                                                         <button type="button"
                                                             onclick="confirmDelete({{ $item->id }}, '{{ $item->jenis }}')"
-                                                            class="flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow transition cursor-pointer">
+                                                            class="group relative flex items-center justify-center w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow transition cursor-pointer">
                                                             <i class="fa fa-trash text-xs"></i>
+                                                            <span
+                                                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                                            Hapus
+                                                            </span>
                                                         </button>
                                                     </form>
                                                 </div>

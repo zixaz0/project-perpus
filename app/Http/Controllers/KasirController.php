@@ -33,4 +33,15 @@ class KasirController extends Controller
     {
         return view('kasir.riwayat_transaksi');
     }
+    public function dashboard()
+    {
+        return view('kasir.dashboard', [
+            'transaksiHariIni' => 8,
+            'pendapatanHariIni' => 250000,
+            'bukuTerjual' => 14,
+            'totalBuku' => 120,
+            'grafikData' => [5, 7, 6, 9, 10, 4, 8],
+            'transaksiTerbaru' => \App\Models\Transaksi::latest()->take(5)->get(),
+        ]);
+    }
 }

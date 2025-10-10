@@ -13,8 +13,8 @@ return new class extends Migration
             $table->foreignId('buku_id')
                   ->constrained('buku')
                   ->onDelete('cascade'); // kalau buku dihapus, stok_harga ikut hilang
-            $table->integer('stok')->default(0);
-            $table->decimal('harga', 15, 2); // format harga, maksimal 15 digit, 2 desimal
+            $table->integer('stok')->default(0)->nullable();
+            $table->decimal('harga', 15, 2)->default(0)->nullable(); // format harga, maksimal 15 digit, 2 desimal
             $table->timestamps();
         });
     }

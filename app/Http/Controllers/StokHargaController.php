@@ -60,7 +60,7 @@ class StokHargaController extends Controller
     }
 
     /**
-     * Form edit stok & harga
+     * Form edit harga (tidak bisa edit stok)
      */
     public function edit(StokHarga $stok_harga)
     {
@@ -69,24 +69,51 @@ class StokHargaController extends Controller
     }
 
     /**
-     * Update stok & harga
+     * Update harga saja (stok tidak diubah)
      */
     public function update(Request $request, StokHarga $stok_harga)
     {
         $request->validate([
-            'buku_id' => [
-                'required',
-                'exists:buku,id',
-                Rule::unique('stok_harga','buku_id')->ignore($stok_harga->id),
-            ],
-            'stok'    => 'required|integer|min:0',
-            'harga'   => 'required|numeric|min:0',
+            'harga' => 'required|numeric|min:0',
+        ], [
+            'harga.required' => 'Harga harus diisi.',
+            'harga.numeric'  => 'Harga harus berupa angka.',
+            'harga.min'      => 'Harga minimal 0.',
         ]);
     
-        $stok_harga->update($request->only(['buku_id', 'stok', 'harga']));
+        $stok_harga->update(['harga' => $request->harga]);
     
         return redirect()->route('admin.stok_harga.index')
-            ->with('success', 'Data stok & harga berhasil diperbarui.');
+            ->with('success', 'Harga berhasil diperbarui.');
+    }
+
+    /**
+     * Form tambah stok
+     */
+    public function tambahStokForm(StokHarga $stok_harga)
+    {
+        return view('admin.stok_harga.tambah_stok', compact('stok_harga'));
+    }
+
+    /**
+     * Proses tambah stok (menambahkan ke stok yang sudah ada)
+     */
+    public function tambahStok(Request $request, StokHarga $stok_harga)
+    {
+        $request->validate([
+            'jumlah_tambah' => 'required|integer|min:1',
+        ], [
+            'jumlah_tambah.required' => 'Jumlah stok yang ditambahkan harus diisi.',
+            'jumlah_tambah.integer'  => 'Jumlah stok harus berupa angka.',
+            'jumlah_tambah.min'      => 'Jumlah stok minimal 1.',
+        ]);
+
+        // Tambahkan stok baru ke stok yang sudah ada
+        $stok_harga->stok += $request->jumlah_tambah;
+        $stok_harga->save();
+
+        return redirect()->route('admin.stok_harga.index')
+            ->with('success', "Berhasil menambahkan {$request->jumlah_tambah} stok. Total stok sekarang: {$stok_harga->stok}");
     }
 
     /**

@@ -19,7 +19,9 @@
 
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
-            <h1 class="text-2xl font-bold text-gray-800"> Log Aktivitas</h1>
+            <h1 class="text-2xl font-bold text-gray-800"> 
+                <i class="fas fa-clipboard-list text-indigo-600"></i>
+                Log Aktivitas</h1>
 
             <form action="{{ route('admin.logs.index') }}" method="GET" class="flex items-center gap-2">
                 <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari aksi / model..."
@@ -64,10 +66,13 @@
                                     @php
                                         $activity = strtolower($log->activity);
                                         $badgeColor = match (true) {
-                                            str_contains($activity, 'buat') || str_contains($activity, 'tambah') => 'bg-green-100 text-green-700',
-                                            str_contains($activity, 'ubah') || str_contains($activity, 'edit') => 'bg-yellow-100 text-yellow-700',
-                                            str_contains($activity, 'hapus') || str_contains($activity, 'delete') => 'bg-red-100 text-red-700',
-                                            default => 'bg-gray-100 text-gray-700'
+                                            str_contains($activity, 'buat') || str_contains($activity, 'tambah')
+                                                => 'bg-green-100 text-green-700',
+                                            str_contains($activity, 'ubah') || str_contains($activity, 'edit')
+                                                => 'bg-yellow-100 text-yellow-700',
+                                            str_contains($activity, 'hapus') || str_contains($activity, 'delete')
+                                                => 'bg-red-100 text-red-700',
+                                            default => 'bg-gray-100 text-gray-700',
                                         };
                                     @endphp
                                     <span class="px-2 py-1 text-xs font-semibold rounded {{ $badgeColor }}">
@@ -85,9 +90,13 @@
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <a href="{{ route('admin.logs.show', $log->id) }}"
-                                        class="inline-flex items-center justify-center w-8 h-8 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 transition"
+                                        class="group relative inline-flex items-center justify-center w-8 h-8 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 transition"
                                         title="Lihat Detail">
                                         <i class="fa fa-eye text-xs"></i>
+                                        <span
+                                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                            Lihat Detail
+                                        </span>
                                     </a>
                                 </td>
                             </tr>

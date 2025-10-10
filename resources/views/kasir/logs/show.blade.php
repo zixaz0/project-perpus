@@ -10,7 +10,8 @@
     <div class="bg-white shadow-lg rounded-xl p-6 border border-gray-100">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-800">
-                📄 Detail Log Aktivitas
+                <i class="fas fa-info-circle text-indigo-600"></i>
+                Detail Log Aktivitas
             </h2>
             <span class="text-sm text-gray-500">
                 {{ $log->created_at->format('d M Y, H:i') }}

@@ -13,8 +13,8 @@
             </li>
             <li class="mx-2">/</li>
             <li>
-                <a href="{{ route('admin.stok_harga.edit', $stok_harga->id) }}" class="text-blue-600 hover:underline">Edit
-                    Harga</a>
+                <a href="{{ route('admin.stok_harga.tambah_stok_form', $stok_harga->id) }}" class="text-blue-600 hover:underline">Tambah
+                    Stok</a>
             </li>
         </ol>
     </nav>
@@ -35,12 +35,11 @@
 
 @section('content')
     <div class="max-w-3xl mx-auto px-6 py-10">
-        <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">Edit Harga Buku</h1>
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 border-b pb-4">Tambah Stok Buku</h1>
 
         <div class="bg-white p-8 rounded-2xl shadow-lg border">
-            <form action="{{ route('admin.stok_harga.update', $stok_harga->id) }}" method="POST" class="space-y-6">
+            <form action="{{ route('admin.stok_harga.tambah_stok', $stok_harga->id) }}" method="POST" class="space-y-6">
                 @csrf
-                @method('PUT')
 
                 <!-- Info Buku -->
                 <div>
@@ -56,37 +55,30 @@
                     </div>
                 </div>
 
-                <!-- Info Stok (readonly) -->
+                <!-- Stok Saat Ini -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Stok Saat Ini</label>
                     <div class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50">
                         <span class="text-2xl font-bold text-indigo-600">{{ $stok_harga->stok }}</span>
                         <span class="text-gray-600 ml-2">unit</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-1">Stok tidak dapat diubah di sini. Gunakan fitur "Tambah Stok" untuk menambah stok.</p>
                 </div>
 
-                <!-- Harga Saat Ini -->
+                <!-- Input Jumlah Tambahan Stok -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Harga Saat Ini</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-4 py-3 bg-gray-50">
-                        <span class="text-2xl font-bold text-gray-800">Rp {{ number_format($stok_harga->harga, 0, ',', '.') }}</span>
-                    </div>
+                    <label for="jumlah_tambah" class="block text-sm font-medium text-gray-700 mb-2">Jumlah Stok yang Ditambahkan</label>
+                    <input type="number" id="jumlah_tambah" name="jumlah_tambah" value="{{ old('jumlah_tambah') }}"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="Masukkan jumlah stok yang akan ditambahkan..." min="1" required>
+                    <p class="text-xs text-gray-500 mt-1">Stok akan ditambahkan ke jumlah yang sudah ada</p>
                 </div>
 
-                <!-- Input Harga Baru -->
-                <div>
-                    <label for="harga" class="block text-sm font-medium text-gray-700 mb-2">Harga Baru</label>
-                    <input type="number" id="harga" name="harga" value="{{ old('harga', $stok_harga->harga) }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        placeholder="Masukkan harga baru..." min="0" required>
-                </div>
-
-                <!-- Preview Harga Baru -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p class="text-sm text-gray-600 mb-1">Preview Harga Baru:</p>
-                    <p class="text-2xl font-bold text-yellow-600">
-                        Rp <span id="preview-harga">{{ number_format($stok_harga->harga, 0, ',', '.') }}</span>
+                <!-- Preview Total Stok -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Total Stok Setelah Penambahan:</p>
+                    <p class="text-2xl font-bold text-green-600">
+                        <span id="preview-total">{{ $stok_harga->stok }}</span>
+                        <span class="text-base text-gray-600 ml-2">unit</span>
                     </p>
                 </div>
 
@@ -97,8 +89,8 @@
                         Batal
                     </a>
                     <button type="submit"
-                        class="cursor-pointer px-5 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg shadow-md transition font-medium">
-                        Update Harga
+                        class="cursor-pointer px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition font-medium">
+                        Tambah Stok
                     </button>
                 </div>
             </form>
@@ -106,11 +98,12 @@
     </div>
 
     <script>
-        // Update preview harga saat input berubah
-        document.getElementById('harga').addEventListener('input', function() {
-            const harga = parseInt(this.value) || 0;
-            const formatted = harga.toLocaleString('id-ID');
-            document.getElementById('preview-harga').textContent = formatted;
+        // Update preview total stok saat input berubah
+        document.getElementById('jumlah_tambah').addEventListener('input', function() {
+            const stokSekarang = {{ $stok_harga->stok }};
+            const jumlahTambah = parseInt(this.value) || 0;
+            const total = stokSekarang + jumlahTambah;
+            document.getElementById('preview-total').textContent = total;
         });
     </script>
 @endsection

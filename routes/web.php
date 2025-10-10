@@ -17,6 +17,7 @@ use App\Http\Controllers\KasirMidtransController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\LaporanController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::get('/', function () {
@@ -36,18 +37,20 @@ Route::post('/pembayaran', [PembayaranController::class, 'bayar'])->name('pembay
 // ===================================================
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/buku.index', [BukuController::class, 'index'])->name('admin.buku.index');
     Route::get('/admin/kasir.index', [UserController::class, 'KasirIndex'])->name('admin.kasir.index');
-    Route::get('/admin/riwayat_transaksi.index', [AdminController::class, 'riwayat_transaksi'])->name('admin.riwayat_transaksi.index');
+    Route::get('admin/riwayat-transaksi', [TransaksiController::class, 'riwayatadmin'])->name('admin.riwayat_transaksi.index');
 
     // Buku
-    Route::resource('buku', BukuController::class)->names('admin.buku');
+    Route::resource('admin/buku', BukuController::class)->names('admin.buku');
     Route::get('/buku/{id}/edit', [BukuController::class, 'edit'])->name('buku.edit');
     Route::put('/buku/{id}', [BukuController::class, 'update'])->name('buku.update');
     Route::get('/admin/buku/generate-kode/{kategori_id}', [BukuController::class, 'generateKode'])->name('admin.buku.generateKode');
 
     // Stok & Harga
-    Route::resource('stok_harga', StokHargaController::class)->names('admin.stok_harga');
+    Route::resource('admin/stok_harga', StokHargaController::class)->names('admin.stok_harga');
+
+    Route::get('/stok-harga/tambah-stok/{stok_harga}', [StokHargaController::class, 'tambahStokForm'])->name('admin.stok_harga.tambah_stok_form');
+    Route::post('/stok-harga/tambah-stok/{stok_harga}', [StokHargaController::class, 'tambahStok'])->name('admin.stok_harga.tambah_stok');
 
     // Kasir Management
     Route::prefix('admin')->group(function () {
@@ -64,9 +67,9 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
             ->names('admin.kategori')
             ->except(['show']);
         // Activity Log (Admin)
-       
-            Route::get('/logs', [ActivityLogController::class, 'index'])->name('admin.logs.index');
-            Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('admin.logs.show');
+
+        Route::get('/logs', [ActivityLogController::class, 'index'])->name('admin.logs.index');
+        Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('admin.logs.show');
     });
 });
 
@@ -77,7 +80,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
     Route::get('/owner', [OwnerController::class, 'index'])->name('owner.dashboard');
     Route::get('/owner/buku/index', [BukuController::class, 'indexowner'])->name('owner.buku.index');
     Route::get('/owner/pegawai/index', [OwnerPegawaiController::class, 'index'])->name('owner.pegawai.index');
-    Route::get('/owner/laporan_penjualan', [OwnerController::class, 'laporan_penjualan'])->name('owner.laporan_penjualan');
+    Route::get('/owner/laporan_penjualan', [LaporanController::class, 'index'])->name('owner.laporan.index');
+    Route::get('/owner/laporan_penjualan/detail', [LaporanController::class, 'detail'])->name('owner.laporan.detail');
     Route::prefix('owner')
         ->name('owner.')
         ->middleware(['auth', 'role:owner'])
@@ -119,8 +123,10 @@ Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
                 Route::post('checkout', [TransaksiController::class, 'checkout'])->name('checkout');
                 Route::get('struk/{id}', [TransaksiController::class, 'struk'])->name('struk');
                 Route::patch('update/{buku}', [TransaksiController::class, 'updateQty'])->name('update');
+                Route::delete('clear', [TransaksiController::class, 'clear'])->name('clear');
             });
-            // Activity Log (Kasir)
-            Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
-            Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('logs.show');
+
+        // Activity Log (Kasir)
+        Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+        Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('logs.show');
     });

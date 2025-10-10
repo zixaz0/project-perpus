@@ -15,188 +15,430 @@
 @endsection
 
 @section('content')
-    <div class="container mx-auto px-6 py-8">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800"><i class="fas fa-book text-indigo-600"></i> Data Buku</h1>
-        </div>
+    <div class="container mx-auto px-6 py-8 flex gap-6">
+        <!-- Main Content -->
+        <div class="flex-1">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <i class="fas fa-book text-indigo-600"></i> Data Buku
+                </h1>
+            </div>
 
-        <!-- Filter & Search -->
-        <div class="flex flex-wrap items-center justify-between mb-4 gap-3">
-            <form action="{{ route('kasir.buku.index') }}" method="GET" class="flex flex-wrap items-center gap-2">
-                <input type="text" id="searchCard" name="q" value="{{ request('q') }}"
-                    placeholder="Cari judul / kode..."
-                    class="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Filter & Search Section -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Daftar Buku</h2>
 
-                <select name="kategori_id" type="submit"
-                    class="cursor-pointer px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Semua Kategori</option>
-                    @foreach ($kategori as $group => $items)
-                        <optgroup label="{{ $group }}">
-                            @foreach ($items as $kat)
-                                <option value="{{ $kat->id }}"
-                                    {{ request('kategori_id') == $kat->id ? 'selected' : '' }}>
-                                    {{ $kat->jenis }}
-                                </option>
+                    <form action="{{ route('kasir.buku.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
+                        <!-- Toggle Hanya Tersedia -->
+                        <label class="flex items-center space-x-2 bg-gray-50 px-3 py-2 rounded-lg">
+                            <input type="checkbox" id="toggleAvailable"
+                                class="h-4 w-4 text-indigo-600 rounded cursor-pointer" checked>
+                            <span class="text-sm text-gray-700">Hanya tersedia</span>
+                        </label>
+
+                        <!-- Search Input -->
+                        <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari judul / kode..."
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+
+                        <!-- Kategori Dropdown -->
+                        <select name="kategori_id"
+                            class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                            <option value="">Semua Kategori</option>
+                            @foreach ($kategori as $group => $items)
+                                <optgroup label="{{ $group }}">
+                                    @foreach ($items as $kat)
+                                        <option value="{{ $kat->id }}"
+                                            {{ request('kategori_id') == $kat->id ? 'selected' : '' }}>
+                                            {{ $kat->jenis }}
+                                        </option>
+                                    @endforeach
+                                </optgroup>
                             @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
+                        </select>
 
-                <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md cursor-pointer">
-                    <i class="fa fa-search"></i>
-                </button>
-            </form>
+                        <!-- Search Button -->
+                        <button type="submit"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg cursor-pointer transition duration-200 flex items-center gap-2">
+                            <i class="fa fa-search"></i>
+                            <span>Cari</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-            <!-- Checkbox tampilkan stok habis -->
-            <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" id="toggleStokHabis"
-                    class="form-checkbox h-5 w-5 text-indigo-600 cursor-pointer">
-                <span class="text-gray-700 text-sm">Tampilkan stok habis</span>
-            </label>
+            <!-- Grid Buku -->
+            <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                @php $cart = session('cart', []); @endphp
+                @forelse($buku as $item)
+                    @php
+                        $inCart = isset($cart[$item->id]);
+                        $stok = $item->stokHarga->stok ?? 0;
+                    @endphp
+                    <div class="book-card relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 flex flex-col
+                    {{ $stok <= 0 ? 'opacity-50' : 'hover:-translate-y-1' }}"
+                        data-title="{{ strtolower($item->judul_buku) }} {{ strtolower($item->kode_buku) }} {{ strtolower($item->kategori->kategori ?? '') }}"
+                        data-stok="{{ $stok }}">
+
+                        <div class="relative w-full mb-4" style="padding-top: 150%;">
+                            <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover {{ $item->judul_buku }}"
+                                class="absolute inset-0 w-full h-full object-cover rounded-lg 
+                                    {{ $stok <= 0 ? 'opacity-40' : '' }}">
+
+                            @if ($stok <= 0)
+                                <div class="absolute inset-0 flex items-center justify-center rounded-lg">
+                                    <span class="bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                                        Stok Habis
+                                    </span>
+                                </div>
+                            @else
+                                <div
+                                    class="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
+                                    {{ $stok }} pcs
+                                </div>
+                            @endif
+                        </div>
+
+                        <h3 class="font-bold text-lg text-gray-800 mb-2 line-clamp-2">{{ $item->judul_buku }}</h3>
+
+                        <div class="space-y-2 mb-4">
+                            <p class="text-sm text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-tag text-blue-500 w-4"></i>
+                                <span class="truncate">{{ $item->kategori->kategori ?? '-' }}</span>
+                            </p>
+                            <p class="text-sm text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-calendar text-green-500 w-4"></i>
+                                {{ $item->tahun_terbit->format('Y') }}
+                            </p>
+                            <p class="text-lg font-bold text-indigo-600 flex items-center gap-2">
+                                <i class="fas fa-money-bill-wave w-4"></i>
+                                {{ $item->stokHarga ? 'Rp ' . number_format($item->stokHarga->harga, 0, ',', '.') : '-' }}
+                            </p>
+                        </div>
+
+                        <!-- Tombol Aksi -->
+                        <div class="mt-auto flex gap-2">
+                            <!-- Tombol Detail -->
+                            <button onclick="showDetail({{ $item->id }})"
+                                class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg shadow-md transition-all duration-200 font-medium cursor-pointer hover:shadow-lg">
+                                <i class="fas fa-eye"></i> Detail
+                            </button>
+
+                            @if ($stok > 0)
+                                @if (!$inCart)
+                                    <!-- Tombol Add to Cart -->
+                                    <form action="{{ route('kasir.transaksi.add', $item->id) }}" method="POST"
+                                        class="w-1/2 add-cart-form">
+                                        @csrf
+                                        <button type="submit"
+                                            class="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg shadow-md transition-all duration-200 font-medium cursor-pointer hover:shadow-lg">
+                                            <i class="fas fa-cart-plus"></i> Tambah
+                                        </button>
+                                    </form>
+                                @else
+                                    <!-- Counter Quantity -->
+                                    <form action="{{ route('kasir.transaksi.update', $item->id) }}" method="POST"
+                                        class="flex w-1/2 border-2 border-gray-200 rounded-lg overflow-hidden update-cart-form"
+                                        data-stok="{{ $stok }}">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] - 1 }}"
+                                            class="px-3 bg-gray-100 hover:bg-gray-200 cursor-pointer transition font-bold text-gray-700">−</button>
+                                        <span
+                                            class="flex-1 text-center py-2 font-semibold text-gray-800 bg-white">{{ $cart[$item->id]['qty'] }}</span>
+                                        <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] + 1 }}"
+                                            class="px-3 bg-gray-100 hover:bg-gray-200 cursor-pointer transition font-bold text-gray-700 btn-plus">+</button>
+                                    </form>
+                                @endif
+                            @else
+                                <!-- Tombol Disabled untuk Stok Habis -->
+                                <button disabled
+                                    class="w-1/2 bg-gray-400 text-white py-2.5 rounded-lg shadow cursor-not-allowed font-medium">
+                                    <i class="fas fa-ban"></i> Habis
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-3 text-center py-12">
+                        <i class="fas fa-inbox text-gray-300 text-6xl mb-4"></i>
+                        <p class="text-gray-500 text-lg">Belum ada buku.</p>
+                    </div>
+                @endforelse
+            </div>
         </div>
 
-        <!-- Grid Buku -->
-        <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            @php $cart = session('cart', []); @endphp
-            @forelse($buku as $item)
-                @php 
-                    $inCart = isset($cart[$item->id]); 
-                    $stok = $item->stokHarga->stok ?? 0;
-                @endphp
-                <div class="book-card bg-white rounded-lg shadow hover:shadow-lg transition p-4 flex flex-col {{ $stok == 0 ? 'stok-habis hidden' : '' }}"
-                    data-title="{{ strtolower($item->judul_buku) }} {{ strtolower($item->kode_buku) }} {{ strtolower($item->kategori->kategori ?? '') }}">
-
-                    <div class="relative w-full mb-4" style="padding-top: 150%;">
-                        <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover {{ $item->judul_buku }}"
-                            class="absolute inset-0 w-full h-full object-cover rounded {{ $stok == 0 ? 'opacity-50 blur-[2px]' : '' }}">
-                        @if($stok == 0)
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="bg-red-400 text-white px-3 py-1 text-xs font-bold rounded-lg shadow">Stok Habis</span>
+        <!-- 🛒 SIDEBAR CART -->
+        <div id="cartSidebar" class="hidden lg:block w-96 flex-shrink-0">
+            <div class="sticky top-6 bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-green-600 to-green-700 p-5 text-white">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-shopping-cart text-2xl"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Keranjang</h3>
+                                <p class="text-sm text-green-100" id="cartCount">0 item</p>
                             </div>
-                        @endif
-                    </div>
-
-                    <h3 class="font-bold text-lg text-gray-800 mb-2">{{ $item->judul_buku }}</h3>
-
-                    <p class="text-sm text-gray-600 mb-1">
-                        <i class="fas fa-tag text-blue-500"></i>
-                        {{ $item->kategori->kategori ?? '-' }}
-                    </p>
-
-                    <p class="text-sm text-gray-600 mb-1">
-                        <i class="fas fa-calendar text-green-500"></i>
-                        {{ $item->tahun_terbit->format('Y') }}
-                    </p>
-
-                    <p class="text-sm text-gray-600 mb-1">
-                        <i class="fas fa-cubes text-purple-500"></i>
-                        Stok: {{ $stok }}
-                    </p>
-                    <p class="text-sm text-gray-600 mb-4">
-                        <i class="fas fa-dollar-sign text-yellow-500"></i>
-                        Harga: {{ $item->stokHarga ? 'Rp ' . number_format($item->stokHarga->harga, 0, ',', '.') : '-' }}
-                    </p>
-
-                    <!-- Tombol Aksi -->
-                    <div class="mt-auto flex gap-2">
-                        <!-- Detail tetap ada -->
-                        <button onclick="showDetail({{ $item->id }})"
-                            class="w-1/2 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg shadow transition cursor-pointer">
-                            <i class="fas fa-eye"></i>
+                        </div>
+                        <button onclick="clearCartConfirm()"
+                            class="group relative cursor-pointer hover:bg-green-800 p-2 rounded-lg transition"
+                            title="Kosongkan keranjang">
+                            <i class="fas fa-trash-alt text-lg"></i>
+                            <span
+                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                Kosongkan
+                            </span>
                         </button>
-
-                        @if ($stok > 0)
-                            @if (!$inCart)
-                                <form action="{{ route('kasir.transaksi.add', $item->id) }}" method="POST"
-                                    class="w-1/2 add-cart-form">
-                                    @csrf
-                                    <button type="submit"
-                                        class="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg shadow transition cursor-pointer">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </form>
-                            @else
-                                <form action="{{ route('kasir.transaksi.update', $item->id) }}" method="POST"
-                                    class="flex w-1/2 border rounded overflow-hidden update-cart-form"
-                                    data-stok="{{ $stok }}">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] - 1 }}"
-                                        class="px-3 bg-gray-100 cursor-pointer">−</button>
-                                    <span class="flex-1 text-center py-2">{{ $cart[$item->id]['qty'] }}</span>
-                                    <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] + 1 }}"
-                                        class="px-3 bg-gray-100 cursor-pointer btn-plus">+</button>
-                                </form>
-                            @endif
-                        @else
-                            <button disabled
-                                class="w-1/2 bg-gray-400 text-white py-2 rounded-lg shadow cursor-not-allowed">
-                                <i class="fas fa-ban"></i>
-                            </button>
-                        @endif
                     </div>
                 </div>
-            @empty
-                <p class="col-span-4 text-center text-gray-500">Belum ada buku.</p>
-            @endforelse
+
+                <!-- Cart Items -->
+                <div id="cartItems" class="p-4 space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto">
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fas fa-shopping-basket text-5xl mb-3"></i>
+                        <p class="text-sm">Keranjang masih kosong</p>
+                    </div>
+                </div>
+
+                <!-- Summary & Checkout -->
+                <div id="cartSummary" class="hidden border-t-2 border-gray-200 p-5 bg-gray-50">
+                    <div class="space-y-3 mb-4">
+                        <div class="flex justify-between text-gray-700">
+                            <span class="font-medium">Total Item:</span>
+                            <span id="totalQty" class="font-bold text-indigo-600">0 pcs</span>
+                        </div>
+                        <div class="flex justify-between text-gray-900 text-lg pt-2 border-t border-gray-300">
+                            <span class="font-bold">Total Harga:</span>
+                            <span id="totalPrice" class="font-bold text-green-600">Rp 0</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('kasir.transaksi.index') }}"
+                        class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 rounded-lg font-bold transition-all duration-200 hover:shadow-lg cursor-pointer">
+                        <i class="fas fa-cash-register"></i> Checkout Sekarang
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <!-- Checkout Button (Sticky) -->
-        <div id="checkoutButton" class="hidden fixed bottom-6 right-6 z-50">
-            <a href="{{ route('kasir.transaksi.index') }}"
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
-                <i class="fas fa-shopping-cart"></i>
-                <span id="checkoutInfo">Checkout</span>
-            </a>
+        <!-- 📱 Mobile Cart Button (Floating) -->
+        <button id="mobileCartBtn" onclick="toggleMobileCart()"
+            class="lg:hidden fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center z-50 transition-all duration-200 hover:scale-110">
+            <i class="fas fa-shopping-cart text-2xl"></i>
+            <span id="mobileCartBadge"
+                class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
+        </button>
+
+        <!-- 📱 Mobile Cart Modal -->
+        <div id="mobileCartModal" class="lg:hidden hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+            onclick="toggleMobileCart()">
+            <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[80vh] flex flex-col"
+                onclick="event.stopPropagation()">
+                <!-- Mobile Header -->
+                <div class="bg-gradient-to-r from-green-600 to-green-700 p-5 text-white rounded-t-3xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-shopping-cart text-2xl"></i>
+                            <div>
+                                <h3 class="text-xl font-bold">Keranjang</h3>
+                                <p class="text-sm text-green-100" id="mobileCartCount">0 item</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleMobileCart()" class="hover:bg-green-800 p-2 rounded-lg transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Cart Items -->
+                <div id="mobileCartItems" class="flex-1 p-4 space-y-3 overflow-y-auto">
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fas fa-shopping-basket text-5xl mb-3"></i>
+                        <p class="text-sm">Keranjang masih kosong</p>
+                    </div>
+                </div>
+
+                <!-- Mobile Summary -->
+                <div id="mobileCartSummary" class="hidden border-t-2 border-gray-200 p-5 bg-gray-50">
+                    <div class="space-y-3 mb-4">
+                        <div class="flex justify-between text-gray-700">
+                            <span class="font-medium">Total Item:</span>
+                            <span id="mobileTotalQty" class="font-bold text-indigo-600">0 pcs</span>
+                        </div>
+                        <div class="flex justify-between text-gray-900 text-lg pt-2 border-t border-gray-300">
+                            <span class="font-bold">Total Harga:</span>
+                            <span id="mobileTotalPrice" class="font-bold text-green-600">Rp 0</span>
+                        </div>
+                    </div>
+                    <a href="{{ route('kasir.transaksi.index') }}"
+                        class="block w-full bg-green-600 hover:bg-green-700 text-white text-center py-3 rounded-lg font-bold transition-all duration-200 cursor-pointer">
+                        <i class="fas fa-cash-register"></i> Checkout Sekarang
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Script -->
+    <script>
+        // Toggle untuk menampilkan/menyembunyikan buku yang stok habis
+        document.getElementById('toggleAvailable').addEventListener('change', function() {
+            const bookCards = document.querySelectorAll('.book-card');
+            bookCards.forEach(card => {
+                const stok = parseInt(card.getAttribute('data-stok'));
+                if (this.checked) {
+                    if (stok <= 0) card.style.display = 'none';
+                } else {
+                    card.style.display = 'flex';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('toggleAvailable');
+            if (toggle.checked) {
+                const bookCards = document.querySelectorAll('.book-card');
+                bookCards.forEach(card => {
+                    const stok = parseInt(card.getAttribute('data-stok'));
+                    if (stok <= 0) card.style.display = 'none';
+                });
+            }
+        });
+    </script>
+
+    <!-- Main Script -->
     <script>
         const cart = {!! json_encode($cart) !!};
+        const allBooks = @json($buku->items());
 
-        // ✅ Toggle stok habis
-        document.getElementById("toggleStokHabis").addEventListener("change", function() {
-            document.querySelectorAll(".stok-habis").forEach(card => {
-                card.classList.toggle("hidden", !this.checked);
-            });
-        });
+        // 🛒 Render Cart Sidebar
+        function renderCart() {
+            const cartItemsDesktop = document.getElementById('cartItems');
+            const cartItemsMobile = document.getElementById('mobileCartItems');
+            const cartSummary = document.getElementById('cartSummary');
+            const mobileCartSummary = document.getElementById('mobileCartSummary');
 
-        // ✅ Realtime search
-        document.getElementById("searchCard").addEventListener("keyup", function() {
-            let keyword = this.value.toLowerCase();
-            document.querySelectorAll(".book-card").forEach(card => {
-                let text = card.getAttribute("data-title");
-                card.style.display = text.includes(keyword) ? "flex" : "none";
-            });
-        });
+            const cartKeys = Object.keys(cart);
 
-        // ✅ Update checkout button
-        function updateCheckoutButton() {
-            const btn = document.getElementById("checkoutButton");
-            const info = document.getElementById("checkoutInfo");
-            const qty = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-            const total = Object.values(cart).reduce((sum, item) => sum + (item.harga ?? 0) * item.qty, 0);
-
-            if (qty > 0) {
-                btn.classList.remove("hidden");
-                info.innerText = `Checkout (${qty} item - Rp ${new Intl.NumberFormat('id-ID').format(total)})`;
-            } else {
-                btn.classList.add("hidden");
+            if (cartKeys.length === 0) {
+                const emptyHTML = `
+                    <div class="text-center py-12 text-gray-400">
+                        <i class="fas fa-shopping-basket text-5xl mb-3"></i>
+                        <p class="text-sm">Keranjang masih kosong</p>
+                    </div>
+                `;
+                cartItemsDesktop.innerHTML = emptyHTML;
+                cartItemsMobile.innerHTML = emptyHTML;
+                cartSummary.classList.add('hidden');
+                mobileCartSummary.classList.add('hidden');
+                document.getElementById('mobileCartBadge').classList.add('hidden');
+                return;
             }
-        }
-        updateCheckoutButton();
 
-        // ✅ Batasi qty agar tidak melebihi stok
+            let itemsHTML = '';
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            cartKeys.forEach(bookId => {
+                const cartItem = cart[bookId];
+                const book = allBooks.find(b => b.id == bookId);
+
+                if (book) {
+                    const subtotal = cartItem.harga * cartItem.qty;
+                    totalQty += cartItem.qty;
+                    totalPrice += subtotal;
+
+                    itemsHTML += `
+                        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-green-300 transition">
+                            <div class="flex gap-3">
+                                <img src="/storage/${book.cover_buku}" 
+                                     class="w-16 h-20 object-cover rounded-lg shadow-sm"
+                                     alt="${book.judul_buku}">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-sm text-gray-800 mb-1 line-clamp-2">${book.judul_buku}</h4>
+                                    <p class="text-xs text-gray-500 mb-2">Qty: ${cartItem.qty} × Rp ${new Intl.NumberFormat('id-ID').format(cartItem.harga)}</p>
+                                    <p class="text-sm font-bold text-green-600">Rp ${new Intl.NumberFormat('id-ID').format(subtotal)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            cartItemsDesktop.innerHTML = itemsHTML;
+            cartItemsMobile.innerHTML = itemsHTML;
+
+            document.getElementById('cartCount').textContent = `${totalQty} item`;
+            document.getElementById('mobileCartCount').textContent = `${totalQty} item`;
+            document.getElementById('totalQty').textContent = `${totalQty} pcs`;
+            document.getElementById('mobileTotalQty').textContent = `${totalQty} pcs`;
+            document.getElementById('totalPrice').textContent = `Rp ${new Intl.NumberFormat('id-ID').format(totalPrice)}`;
+            document.getElementById('mobileTotalPrice').textContent =
+                `Rp ${new Intl.NumberFormat('id-ID').format(totalPrice)}`;
+
+            cartSummary.classList.remove('hidden');
+            mobileCartSummary.classList.remove('hidden');
+
+            const badge = document.getElementById('mobileCartBadge');
+            badge.textContent = totalQty;
+            badge.classList.remove('hidden');
+
+            document.getElementById('cartSidebar').classList.remove('hidden');
+        }
+
+        renderCart();
+
+        // 📱 Toggle Mobile Cart
+        function toggleMobileCart() {
+            const modal = document.getElementById('mobileCartModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // 🗑️ Clear Cart
+        function clearCartConfirm() {
+            if (Object.keys(cart).length === 0) return;
+
+            Swal.fire({
+                title: 'Kosongkan Keranjang?',
+                text: "Semua item akan dihapus dari keranjang!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Kosongkan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form DELETE
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route('kasir.transaksi.clear') }}';
+
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+
+                    form.appendChild(csrfToken);
+                    form.appendChild(methodField);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        // Batasi qty agar tidak melebihi stok
         document.querySelectorAll(".update-cart-form").forEach(form => {
             form.addEventListener("submit", function(e) {
                 const stok = parseInt(this.dataset.stok);
                 const plusButton = this.querySelector(".btn-plus");
                 const currentQty = parseInt(this.querySelector("span").innerText);
 
-                // Jika tombol "+" ditekan dan qty sudah = stok, blokir submit
                 if (document.activeElement === plusButton && currentQty >= stok) {
                     e.preventDefault();
                     Swal.fire({
@@ -209,7 +451,7 @@
             });
         });
 
-        // ✅ Detail buku (popup SweetAlert)
+        // 📖 Detail buku
         function showDetail(id) {
             const buku = @json($buku->items());
             let item = buku.find(b => b.id === id);

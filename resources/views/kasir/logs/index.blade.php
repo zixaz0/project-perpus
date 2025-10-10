@@ -71,9 +71,13 @@
                                 <td class="px-4 py-3 text-gray-500">{{ $log->created_at->format('d M Y, H:i') }}</td>
                                 <td class="px-4 py-3 text-center">
                                     <a href="{{ route('kasir.logs.show', $log->id) }}"
-                                        class="inline-flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
+                                        class="group relative inline-flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition"
                                         title="Lihat Detail">
                                         <i class="fa fa-eye text-xs"></i>
+                                        <span
+                                            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                                            Lihat Detail
+                                        </span>
                                     </a>
                                 </td>
                             </tr>

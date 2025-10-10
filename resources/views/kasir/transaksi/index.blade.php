@@ -108,7 +108,7 @@
                         <!-- Diskon -->
                         <input type="text" name="diskon" id="diskon"
                             class="w-full border px-3 py-2 rounded focus:ring focus:ring-indigo-500"
-                            placeholder="Masukkan Diskon">
+                            placeholder="Masukkan Diskon (Opsional)">
 
                         <!-- Dibayar -->
                         <div id="dibayar-wrapper">

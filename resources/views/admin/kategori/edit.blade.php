@@ -48,15 +48,15 @@
                 <div>
                     <label for="kategori" class="block text-sm font-medium text-gray-700 mb-2">Nama Kategori</label>
                     <input type="text" id="kategori" name="kategori" value="{{ $kategori->kategori }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Masukkan nama kategori..." required>
                 </div>
 
                 <div>
                     <label for="jenis" class="block text-sm font-medium text-gray-700 mb-2">Jenis</label>
                     <input type="text" id="jenis" name="jenis" value="{{ $kategori->jenis }}"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Masukkan jenis kategori..." required>
                 </div>
 
                 <div class="flex justify-end space-x-4 pt-4 border-t">
