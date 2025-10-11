@@ -20,7 +20,8 @@
 
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
-            <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-clipboard-list text-indigo-600"></i>
                 Log Aktivitas Semua Pengguna
             </h1>
         </div>

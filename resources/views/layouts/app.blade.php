@@ -26,12 +26,12 @@
         [x-cloak] {
             display: none !important
         }
-        
+
         /* Tooltip Style */
         .tooltip {
             position: relative;
         }
-        
+
         .tooltip-text {
             visibility: hidden;
             opacity: 0;
@@ -48,7 +48,7 @@
             pointer-events: none;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
-        
+
         .tooltip-text::before {
             content: '';
             position: absolute;
@@ -58,7 +58,7 @@
             border: 6px solid transparent;
             border-right-color: #1f2937;
         }
-        
+
         .tooltip:hover .tooltip-text {
             visibility: visible;
             opacity: 1;
@@ -88,39 +88,33 @@
     closeMobileMenu() {
         this.mobileMenuOpen = false;
     }
-}" x-init="
-    $watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', JSON.stringify(val)));
-    window.addEventListener('resize', () => {
-        if (window.innerWidth >= 768) {
-            mobileMenuOpen = false;
-            sidebarOpen = JSON.parse(localStorage.getItem('sidebarOpen')) ?? true;
-        } else {
-            sidebarOpen = false;
-        }
-    });
-">
+}" x-init="$watch('sidebarOpen', val => localStorage.setItem('sidebarOpen', JSON.stringify(val)));
+window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+        mobileMenuOpen = false;
+        sidebarOpen = JSON.parse(localStorage.getItem('sidebarOpen')) ?? true;
+    } else {
+        sidebarOpen = false;
+    }
+});">
 
     <!-- Mobile Overlay -->
-    <div x-show="mobileMenuOpen" 
-         x-transition:enter="transition-opacity ease-linear duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @click="closeMobileMenu()"
-         class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-         x-cloak>
+    <div x-show="mobileMenuOpen" x-transition:enter="transition-opacity ease-linear duration-300"
+        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0" @click="closeMobileMenu()"
+        class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" x-cloak>
     </div>
 
     <!-- Sidebar -->
-    <aside :class="{
-        'w-64': sidebarOpen && window.innerWidth >= 768,
-        'w-20': !sidebarOpen && window.innerWidth >= 768,
-        'translate-x-0': mobileMenuOpen || window.innerWidth >= 768,
-        '-translate-x-full': !mobileMenuOpen && window.innerWidth < 768
-    }"
-    class="fixed left-0 top-0 h-full bg-white text-gray-800 flex flex-col shadow-lg border-r border-gray-200 transition-all duration-300 z-40 md:translate-x-0">
+    <aside
+        :class="{
+            'w-64': sidebarOpen && window.innerWidth >= 768,
+            'w-20': !sidebarOpen && window.innerWidth >= 768,
+            'translate-x-0': mobileMenuOpen || window.innerWidth >= 768,
+            '-translate-x-full': !mobileMenuOpen && window.innerWidth < 768
+        }"
+        class="fixed left-0 top-0 h-full bg-white text-gray-800 flex flex-col shadow-lg border-r border-gray-200 transition-all duration-300 z-40 md:translate-x-0">
 
         <!-- Header -->
         <div class="h-16 flex items-center px-6 border-b border-gray-200">
@@ -134,105 +128,107 @@
             {{-- Menu Admin --}}
             @if (Auth::check() && Auth::user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-tachometer-alt text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Dashboard Admin</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Dashboard Admin</span>
                 </a>
                 <a href="{{ route('admin.buku.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Management Buku</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Management Buku</span>
                 </a>
                 <a href="{{ route('admin.stok_harga.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.stok_harga.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.stok_harga.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-dollar-sign text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Stok & Harga</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Stok & Harga</span>
                 </a>
                 <a href="{{ route('admin.kategori.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.kategori.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.kategori.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-tags text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Management Kategori</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Management Kategori</span>
                 </a>
                 <a href="{{ route('admin.kasir.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.kasir.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.kasir.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-users text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Management Kasir</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Management Kasir</span>
                 </a>
-                <a href="{{ route('admin.riwayat_transaksi.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                <a href="{{ route('admin.riwayat_transaksi.index') }}"
+                    @click="window.innerWidth < 768 && closeMobileMenu()"
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-wallet text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Riwayat Transaksi</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Riwayat Transaksi</span>
                 </a>
                 <a href="{{ route('admin.logs.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('admin.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-clipboard-list text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Log Aktivitas</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Log Aktivitas</span>
                 </a>
             @endif
-        
+
             {{-- Menu Kasir --}}
             @if (Auth::check() && Auth::user()->role === 'kasir')
                 <a href="{{ route('kasir.dashboard') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-cash-register text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Dashboard Kasir</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Dashboard Kasir</span>
                 </a>
                 <a href="{{ route('kasir.buku.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Transaksi</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Transaksi</span>
                 </a>
-                <a href="{{ route('kasir.riwayat_transaksi.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                <a href="{{ route('kasir.riwayat_transaksi.index') }}"
+                    @click="window.innerWidth < 768 && closeMobileMenu()"
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.riwayat_transaksi.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-wallet text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Riwayat Transaksi</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Riwayat Transaksi</span>
                 </a>
                 <a href="{{ route('kasir.logs.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('kasir.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-clipboard-list text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Log Aktivitas</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Log Aktivitas</span>
                 </a>
             @endif
-        
+
             {{-- Menu Owner --}}
             @if (Auth::check() && Auth::user()->role === 'owner')
                 <a href="{{ route('owner.dashboard') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.dashboard') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-user-tie text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Dashboard Owner</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Dashboard Owner</span>
                 </a>
                 <a href="{{ route('owner.buku.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.buku.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-book text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Data Buku</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Data Buku</span>
                 </a>
                 <a href="{{ route('owner.pegawai.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.pegawai.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.pegawai.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-users text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Data Pegawai</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Data Pegawai</span>
                 </a>
                 <a href="{{ route('owner.laporan.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.laporan_penjualan') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.laporan.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-chart-bar text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Laporan Penjualan</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Laporan Penjualan</span>
                 </a>
                 <a href="{{ route('owner.logs.index') }}" @click="window.innerWidth < 768 && closeMobileMenu()"
-                   class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
+                    class="tooltip flex items-center gap-3 p-3 rounded-lg transition hover:bg-indigo-50 {{ request()->routeIs('owner.logs.*') ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'text-gray-600' }}">
                     <i class="fas fa-clipboard-list text-lg w-6 text-center"></i>
                     <span x-show="sidebarOpen || mobileMenuOpen" x-transition>Log Aktivitas</span>
                     <span x-show="!sidebarOpen && !mobileMenuOpen" class="tooltip-text">Log Aktivitas</span>
@@ -257,13 +253,14 @@
     </aside>
 
     <!-- Main Content -->
-    <main :class="sidebarOpen && window.innerWidth >= 768 ? 'md:ml-64' : 'md:ml-20'" 
-          class="flex-1 flex flex-col h-screen transition-all duration-300 ml-0">
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shadow-sm">
+    <main :class="sidebarOpen && window.innerWidth >= 768 ? 'md:ml-64' : 'md:ml-20'"
+        class="flex-1 flex flex-col h-screen transition-all duration-300 ml-0">
+        <header
+            class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6 shadow-sm">
             <button @click="toggleSidebar()" class="cursor-pointer text-gray-600 hover:text-indigo-600">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-            
+
             <!-- Desktop: Waktu -->
             <div class="hidden md:block text-lg font-semibold text-gray-700" id="datetime"></div>
 
@@ -272,7 +269,8 @@
                 <!-- Notifikasi -->
                 <button class="relative text-gray-600 hover:text-indigo-600 cursor-pointer">
                     <i class="fas fa-bell text-lg"></i>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
+                    <span
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
                 </button>
 
                 <!-- User Dropdown -->
@@ -282,7 +280,8 @@
                             ? asset('storage/' . Auth::user()->foto)
                             : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random' }}"
                             alt="avatar" class="w-8 h-8 rounded-full object-cover">
-                        <span class="hidden md:inline text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
+                        <span
+                            class="hidden md:inline text-sm font-medium text-gray-700">{{ Auth::user()->name }}</span>
                         <i class="fas fa-chevron-down text-xs text-gray-500"></i>
                     </button>
 

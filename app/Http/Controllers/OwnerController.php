@@ -2,37 +2,121 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Models\Buku;
+use App\Models\Transaksi;
+use App\Models\TransaksiItem;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
-use Illuminate\Routing\Controller;
-
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class OwnerController extends Controller
 {
-    public function __construct()
-    {
-        // Hanya role owner yang bisa akses controller ini
-        $this->middleware('role:owner');
-    }
-
     public function index()
     {
-        return view('owner.dashboard', [
-            'title' => 'Dashboard'
-        ]);        
-    }
-    public function data_buku()
-    {
-        return view('owner.data_buku');
-    }
-    public function data_pegawai()
-    {
-        return view('owner.data_pegawai');
-    }
-    public function laporan_penjualan()
-    {
-        return view('owner.laporan_penjualan');
+        // Statistik Utama
+        $totalBuku = Buku::count();
+        $totalPegawai = User::whereIn('role', ['kasir', 'admin'])->count();
+        
+        // Statistik Transaksi Bulan Ini
+        $bulanIni = Carbon::now()->startOfMonth();
+        $transaksisBulanIni = Transaksi::where('created_at', '>=', $bulanIni)->get();
+        
+        $totalTransaksiBulanIni = $transaksisBulanIni->count();
+        $totalPendapatanBulanIni = $transaksisBulanIni->sum('subtotal');
+        
+        // Transaksi Hari Ini
+        $hariIni = Carbon::today();
+        $transaksiHariIni = Transaksi::whereDate('created_at', $hariIni)->get();
+        $pendapatanHariIni = $transaksiHariIni->sum('subtotal');
+        $transaksiCountHariIni = $transaksiHariIni->count();
+        
+        // Buku Terlaris Bulan Ini (Top 5)
+        $bukuTerlaris = TransaksiItem::select('buku_id', DB::raw('SUM(qty) as total_terjual'))
+            ->whereHas('transaksi', function($q) use ($bulanIni) {
+                $q->where('created_at', '>=', $bulanIni);
+            })
+            ->groupBy('buku_id')
+            ->orderBy('total_terjual', 'DESC')
+            ->limit(5)
+            ->with('buku.stokHarga')
+            ->get();
+        
+        // Stok Menipis (stok < 10 dan > 0)
+        $stokMenipis = Buku::with('stokHarga', 'kategori')
+            ->whereHas('stokHarga', function($q) {
+                $q->where('stok', '>', 0)->where('stok', '<', 10);
+            })
+            ->limit(5)
+            ->get();
+        
+        // Stok Habis (stok = 0)
+        $stokHabis = Buku::with('stokHarga', 'kategori')
+            ->whereHas('stokHarga', function($q) {
+                $q->where('stok', '=', 0);
+            })
+            ->limit(5)
+            ->get();
+        
+        // Grafik Pendapatan 7 Hari Terakhir
+        $grafikPendapatan = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $tanggal = Carbon::now()->subDays($i);
+            $pendapatan = Transaksi::whereDate('created_at', $tanggal->format('Y-m-d'))
+                ->sum('subtotal');
+            
+            $grafikPendapatan[] = [
+                'tanggal' => $tanggal->format('d M'),
+                'pendapatan' => $pendapatan
+            ];
+        }
+        
+        // Transaksi Terbaru
+        $transaksiTerbaru = Transaksi::with('kasir', 'items.buku')
+            ->orderBy('created_at', 'DESC')
+            ->limit(5)
+            ->get();
+        
+        // Activity Log Terbaru
+        $activityLogs = ActivityLog::with('user')
+            ->orderBy('created_at', 'DESC')
+            ->limit(10)
+            ->get();
+        
+        // Perbandingan Metode Pembayaran Bulan Ini
+        $metodeBayar = Transaksi::select('metode_bayar', DB::raw('COUNT(*) as jumlah'))
+            ->where('created_at', '>=', $bulanIni)
+            ->groupBy('metode_bayar')
+            ->get();
+        
+        // Total Buku Terjual Bulan Ini
+        $totalBukuTerjual = TransaksiItem::whereHas('transaksi', function($q) use ($bulanIni) {
+            $q->where('created_at', '>=', $bulanIni);
+        })->sum('qty');
+        
+        // Rata-rata Transaksi Per Hari
+        $rataRataTransaksi = $totalTransaksiBulanIni > 0 
+            ? $totalPendapatanBulanIni / $totalTransaksiBulanIni 
+            : 0;
+
+        return view('owner.dashboard', compact(
+            'totalBuku',
+            'totalPegawai',
+            'totalTransaksiBulanIni',
+            'totalPendapatanBulanIni',
+            'pendapatanHariIni',
+            'transaksiCountHariIni',
+            'bukuTerlaris',
+            'stokMenipis',
+            'stokHabis',
+            'grafikPendapatan',
+            'transaksiTerbaru',
+            'activityLogs',
+            'metodeBayar',
+            'totalBukuTerjual',
+            'rataRataTransaksi'
+        ));
     }
 }

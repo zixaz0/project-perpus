@@ -1,9 +1,25 @@
 @extends('layouts.app')
 
+@section('breadcrumb')
+    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
+        <ol class="flex items-center space-x-2">
+            <li>
+                <a href="{{ route('owner.dashboard') }}" class="text-indigo-600 hover:underline font-medium">Dashboard</a>
+            </li>
+            <li class="text-gray-400">/</li>
+            <li>
+                <a href="" class="text-indigo-600 hover:underline font-medium">Data Buku</a>
+            </li>
+           
+        </ol>
+    </nav>
+@endsection
+
 @section('content')
     <div class="container mx-auto px-4 py-6">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold"> Data Buku</h1>
+            <h1 class="text-3xl font-bold"> 
+                <i class="fas fa-book text-indigo-600"></i> Data Buku</h1>
             <div class="flex items-center space-x-3">
                 <!-- Search Bar -->
                 <form action="{{ route('owner.buku.index') }}" method="GET" class="flex">

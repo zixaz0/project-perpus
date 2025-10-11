@@ -77,11 +77,12 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
 // =============== OWNER ROUTES =======================
 // ===================================================
 Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function () {
-    Route::get('/owner', [OwnerController::class, 'index'])->name('owner.dashboard');
+    Route::get('/owner/dashboard', [OwnerController::class, 'index'])->name('owner.dashboard');
     Route::get('/owner/buku/index', [BukuController::class, 'indexowner'])->name('owner.buku.index');
     Route::get('/owner/pegawai/index', [OwnerPegawaiController::class, 'index'])->name('owner.pegawai.index');
     Route::get('/owner/laporan_penjualan', [LaporanController::class, 'index'])->name('owner.laporan.index');
     Route::get('/owner/laporan_penjualan/detail', [LaporanController::class, 'detail'])->name('owner.laporan.detail');
+    Route::get('/owner/laporan_penjualan/print', [LaporanController::class, 'print'])->name('owner.laporan.print');
     Route::prefix('owner')
         ->name('owner.')
         ->middleware(['auth', 'role:owner'])
@@ -95,25 +96,27 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
     });
 });
 
+// Tambahkan ini ke dalam group kasir yang sudah ada di web.php
+
 Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
     ->prefix('kasir')
     ->name('kasir.')
     ->group(function () {
-        // Dashboard
+        // Dashboard (sudah ada)
         Route::get('/', [KasirController::class, 'index'])->name('dashboard');
 
-        // Midtrans Routes (dengan CSRF protection)
+        // Midtrans Routes (sudah ada, tetap pakai)
         Route::post('/midtrans/token', [KasirMidtransController::class, 'getToken'])->name('midtrans.token');
         Route::post('/midtrans/cancel', [KasirMidtransController::class, 'cancelPayment'])->name('midtrans.cancel');
         Route::post('/midtrans/deny', [KasirMidtransController::class, 'denyPayment'])->name('midtrans.deny');
 
-        // Data Buku
+        // Data Buku (sudah ada)
         Route::get('/buku', [BukuController::class, 'indexkasir'])->name('buku.index');
 
-        // Riwayat Transaksi
+        // Riwayat Transaksi (sudah ada)
         Route::get('/riwayat-transaksi', [TransaksiController::class, 'riwayat'])->name('riwayat_transaksi.index');
 
-        // Transaksi / Keranjang
+        // Transaksi / Keranjang (sudah ada, tetap pakai yang ini)
         Route::prefix('transaksi')
             ->name('transaksi.')
             ->group(function () {
@@ -126,7 +129,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
                 Route::delete('clear', [TransaksiController::class, 'clear'])->name('clear');
             });
 
-        // Activity Log (Kasir)
+        // Activity Log (sudah ada)
         Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
         Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('logs.show');
     });

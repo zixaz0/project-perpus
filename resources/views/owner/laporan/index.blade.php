@@ -15,7 +15,7 @@
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
             <i class="fas fa-chart-bar text-indigo-600"></i> Laporan Penjualan</h1>
-        <a href="" 
+            <a href="{{ route('owner.laporan.print', ['tanggal_awal' => $tanggal_awal, 'tanggal_akhir' => $tanggal_akhir]) }}" 
            target="_blank"
            class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition font-medium">
             <i class="fas fa-print"></i> Cetak Laporan

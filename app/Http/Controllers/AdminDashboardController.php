@@ -23,7 +23,7 @@ class AdminDashboardController extends Controller
             $q = $request->q;
             $query->where(function ($qBuilder) use ($q) {
                 $qBuilder->where('judul_buku', 'like', "%{$q}%")
-                         ->orWhere('kode_buku', 'like', "%{$q}%");
+                    ->orWhere('kode_buku', 'like', "%{$q}%");
             });
         }
 
@@ -34,15 +34,34 @@ class AdminDashboardController extends Controller
 
         $buku = $query->latest()->get();
 
-        // Ambil kategori untuk dropdown (digroup per kategori utama)
+        // Ambil kategori untuk dropdown
         $kategori = Kategori::orderBy('kategori')->get()->groupBy('kategori');
+
+        // Stok Habis (stok = 0)
+        $stokHabis = Buku::with(['kategori', 'stokHarga'])
+            ->whereHas('stokHarga', function ($query) {
+                $query->where('stok', '=', 0);
+            })
+            ->orderBy('judul_buku')
+            ->get();
+
+        // Stok menipis (stok < 10)
+        $stokMenipis = Buku::with(['kategori', 'stokHarga'])
+            ->whereHas('stokHarga', function ($query) {
+                $query->where('stok', '>', 0)
+                      ->where('stok', '<', 10);
+            })
+            ->orderBy('judul_buku')
+            ->get();
 
         return view('admin.dashboard', compact(
             'totalBuku',
             'totalKasir',
             'totalKategori',
             'buku',
-            'kategori'
+            'kategori',
+            'stokHabis',
+            'stokMenipis'
         ));
     }
 }
