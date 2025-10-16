@@ -72,6 +72,57 @@
         </div>
     </div>
 
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <a href="{{ route('admin.buku.create') }}" class="bg-white rounded-xl shadow-md border p-6 hover:shadow-lg transition group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition">
+                    <i class="fas fa-book-medical text-2xl text-blue-600 group-hover:text-white transition"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Tambah<br>Buku</br></h3>
+                    <p class="text-sm text-gray-600">Tambah buku baru</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="{{ route('admin.kategori.create') }}" class="bg-white rounded-xl shadow-md border p-6 hover:shadow-lg transition group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition">
+                    <i class="fas fa-tags text-2xl text-purple-600 group-hover:text-white transition"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Tambah Kategori</h3>
+                    <p class="text-sm text-gray-600">Buat kategori baru</p>
+                </div>
+            </div>
+        </a>
+        
+        <a href="{{ route('kasir.create') }}" class="bg-white rounded-xl shadow-md border p-6 hover:shadow-lg transition group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-600 transition">
+                    <i class="fas fa-user-plus text-2xl text-green-600 group-hover:text-white transition"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Tambah Pegawai</h3>
+                    <p class="text-sm text-gray-600">Daftarkan pegawai</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ route('admin.stok_harga.index') }}" class="bg-white rounded-xl shadow-md border p-6 hover:shadow-lg transition group">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-600 transition">
+                    <i class="fas fa-boxes text-2xl text-orange-600 group-hover:text-white transition"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Kelola<br>Stok</br></h3>
+                    <p class="text-sm text-gray-600">Update stok & harga</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
     <!-- Grafik dan Stok Alert -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <!-- Grafik Distribusi (2 kolom) -->

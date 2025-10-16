@@ -2,8 +2,8 @@
 <html lang="id">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - BukuKita</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -13,12 +13,12 @@
 
   <!-- Card -->
   <div
-    class="w-full max-w-md bg-white/20 backdrop-blur-2xl shadow-2xl rounded-2xl p-8 border border-white/30 transition duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)]">
+    class="w-full max-w-md bg-white/20 backdrop-blur-2xl shadow-2xl rounded-2xl p-8 border border-white/30 ring-1 ring-white/10 transition duration-500 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.4)]">
 
     <!-- Logo -->
     <div class="text-center mb-10">
       <div
-        class="group w-32 h-32 rounded-full p-[4px] bg-gradient-to-tr from-pink-500 via-indigo-500 to-sky-400 mx-auto shadow-xl cursor-pointer transition duration-500 hover:shadow-[0_0_40px_rgba(99,102,241,0.7)]">
+        class="group w-32 h-32 rounded-full p-[4px] bg-gradient-to-tr from-pink-500 via-indigo-500 to-sky-400 mx-auto shadow-xl cursor-pointer transition-transform duration-500 hover:rotate-1 hover:shadow-[0_0_40px_rgba(99,102,241,0.7)]">
         <div
           class="w-full h-full rounded-full bg-white flex items-center justify-center transition duration-500 group-hover:scale-105">
           <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-20 h-20 object-contain">
@@ -43,12 +43,10 @@
           </svg>
         </span>
         <input type="email" name="email" id="email" required value="{{ old('email') }}"
-          class="peer w-full pl-10 pr-4 pt-5 pb-2 rounded-xl bg-white/90 text-gray-800 placeholder-transparent border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition"
+          class="peer w-full pl-10 pr-4 pt-5 pb-2 rounded-xl bg-white/90 text-gray-800 placeholder-transparent border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:shadow-md shadow-sm transition"
           placeholder="Email">
         <label for="email"
-          class="absolute left-10 top-1 text-gray-500 text-sm transition-all duration-200
-                 peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                 peer-focus:top-1 peer-focus:text-sm peer-focus:text-indigo-600">
+          class="absolute left-10 top-1 text-gray-500 text-sm font-medium tracking-wide transition-all duration-200 peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-indigo-600">
           Email
         </label>
         @error('email')
@@ -67,12 +65,10 @@
           </svg>
         </span>
         <input type="password" name="password" id="password" required
-          class="peer w-full pl-10 pr-10 pt-5 pb-2 rounded-xl bg-white/90 text-gray-800 placeholder-transparent border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition"
+          class="peer w-full pl-10 pr-10 pt-5 pb-2 rounded-xl bg-white/90 text-gray-800 placeholder-transparent border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:shadow-md shadow-sm transition"
           placeholder="Password">
         <label for="password"
-          class="absolute left-10 top-1 text-gray-500 text-sm transition-all duration-200
-                 peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base
-                 peer-focus:top-1 peer-focus:text-sm peer-focus:text-indigo-600">
+          class="absolute left-10 top-1 text-gray-500 text-sm font-medium tracking-wide transition-all duration-200 peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-indigo-600">
           Password
         </label>
         <!-- Toggle Password -->
@@ -95,14 +91,14 @@
       <!-- Pesan Error -->
       @if (session('error'))
         <div
-          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm shadow-sm animate-pulse">
+          class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-sm shadow-sm transition-opacity duration-300 animate-pulse">
           {{ session('error') }}
         </div>
       @endif
 
       <!-- Tombol -->
       <button type="submit"
-        class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-sky-400 hover:from-indigo-700 hover:via-blue-600 hover:to-sky-500 text-white font-semibold shadow-lg transition transform hover:scale-[1.04] hover:shadow-[0_0_25px_rgba(59,130,246,0.7)]">
+        class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-sky-400 hover:from-indigo-700 hover:via-blue-600 hover:to-sky-500 text-white font-semibold shadow-lg transition transform hover:scale-[1.04] active:scale-95 focus:outline-none focus:ring-2 focus:ring-white/50 hover:shadow-[0_0_25px_rgba(59,130,246,0.7)]">
         Masuk
       </button>
     </form>

@@ -148,247 +148,193 @@
         @endif
     </div>
 
-    <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
-        data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
+    data-client-key="{{ config('midtrans.client_key') }}"></script>
 
-    <script>
-        const totalHarga = {{ $total ?? 0 }};
-        const diskonInput = document.getElementById('diskon');
-        const dibayarInput = document.getElementById('dibayar');
-        const dibayarWrapper = document.getElementById('dibayar-wrapper');
-        const diskonText = document.getElementById('diskon-text');
-        const subtotalText = document.getElementById('subtotal-text');
-        const checkoutForm = document.getElementById('checkout-form');
-        const metodeSelect = document.getElementById('metode_bayar');
-        const totalInput = document.getElementById('total-input');
-        const btnBayar = document.getElementById('btn-bayar');
-        const btnBatal = document.getElementById('btn-batal');
+<script>
+    // ========== GLOBAL VARIABLES (PAKAI LET BIAR BISA DIUPDATE!) ==========
+    let totalHarga = {{ $total ?? 0 }}; // ⚠️ PENTING: Pakai let, bukan const
+    const diskonInput = document.getElementById('diskon');
+    const dibayarInput = document.getElementById('dibayar');
+    const dibayarWrapper = document.getElementById('dibayar-wrapper');
+    const diskonText = document.getElementById('diskon-text');
+    const subtotalText = document.getElementById('subtotal-text');
+    const checkoutForm = document.getElementById('checkout-form');
+    const metodeSelect = document.getElementById('metode_bayar');
+    const totalInput = document.getElementById('total-input');
+    const btnBayar = document.getElementById('btn-bayar');
+    const btnBatal = document.getElementById('btn-batal');
+    let currentOrderId = null;
 
-        // Variable untuk menyimpan order_id dari Midtrans
-        let currentOrderId = null;
+    // ========== HELPER FUNCTIONS ==========
+    function formatRupiah(angka) {
+        angka = angka.toString().replace(/[^0-9]/g, "");
+        return angka ? "Rp " + angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "Rp 0";
+    }
 
-        // Format Rupiah
-        function formatRupiah(angka) {
-            angka = angka.toString().replace(/[^0-9]/g, "");
-            return angka ? "Rp " + angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "Rp 0";
+    function getAngka(str) {
+        return parseInt(str.replace(/[^0-9]/g, "")) || 0;
+    }
+
+    function updateSubtotal() {
+        const diskon = getAngka(diskonInput.value);
+        const subtotal = Math.max(totalHarga - diskon, 0);
+        diskonText.textContent = "-" + formatRupiah(diskon);
+        subtotalText.textContent = formatRupiah(subtotal);
+    }
+
+    function toggleDibayar() {
+        if (metodeSelect.value === 'debit') {
+            dibayarWrapper.style.display = 'none';
+            dibayarInput.removeAttribute('required');
+        } else {
+            dibayarWrapper.style.display = 'block';
+            dibayarInput.setAttribute('required', 'true');
         }
+    }
 
-        function getAngka(str) {
-            return parseInt(str.replace(/[^0-9]/g, "")) || 0;
-        }
+    // ========== EVENT LISTENERS - DISKON & METODE BAYAR ==========
+    metodeSelect.addEventListener('change', toggleDibayar);
+    toggleDibayar();
 
-        function updateSubtotal() {
-            const diskon = getAngka(diskonInput.value);
-            const subtotal = Math.max(totalHarga - diskon, 0);
-            diskonText.textContent = "-" + formatRupiah(diskon);
-            subtotalText.textContent = formatRupiah(subtotal);
-        }
-
-        // Toggle input "dibayar" kalau pilih Debit
-        function toggleDibayar() {
-            if (metodeSelect.value === 'debit') {
-                dibayarWrapper.style.display = 'none';
-                dibayarInput.removeAttribute('required');
-            } else {
-                dibayarWrapper.style.display = 'block';
-                dibayarInput.setAttribute('required', 'true');
-            }
-        }
-
-        metodeSelect.addEventListener('change', toggleDibayar);
-        toggleDibayar();
-
-        [diskonInput, dibayarInput].forEach(input => {
-            input.addEventListener('input', function() {
-                let angka = getAngka(this.value);
-                this.value = formatRupiah(angka);
-                if (this.id === 'diskon') updateSubtotal();
-            });
+    [diskonInput, dibayarInput].forEach(input => {
+        input.addEventListener('input', function() {
+            let angka = getAngka(this.value);
+            this.value = formatRupiah(angka);
+            if (this.id === 'diskon') updateSubtotal();
         });
+    });
 
-        updateSubtotal();
+    updateSubtotal();
 
-        // ✅ Tombol tambahan (awal disembunyikan)
-        const tombolCetak = document.createElement("button");
-        tombolCetak.textContent = "Cetak Struk";
-        tombolCetak.id = "btnCetak";
-        tombolCetak.type = "button";
-        tombolCetak.className = "hidden w-full bg-green-600 text-white px-4 py-2 rounded mt-3 hover:bg-green-700";
-        checkoutForm.appendChild(tombolCetak);
+    // ========== TOMBOL CETAK ==========
+    const tombolCetak = document.createElement("button");
+    tombolCetak.textContent = "Cetak Struk";
+    tombolCetak.id = "btnCetak";
+    tombolCetak.type = "button";
+    tombolCetak.className = "hidden w-full bg-green-600 text-white px-4 py-2 rounded mt-3 hover:bg-green-700";
+    checkoutForm.appendChild(tombolCetak);
 
-        tombolCetak.addEventListener("click", function() {
-            window.location.href = "{{ route('kasir.dashboard') }}";
-        });
+    tombolCetak.addEventListener("click", function() {
+        window.location.href = "{{ route('kasir.dashboard') }}";
+    });
 
-        // ✅ Tombol "Batalkan Pembayaran" - DIPERBAIKI
-        btnBatal.addEventListener("click", async function(e) {
-            e.preventDefault();
+    // ========== TOMBOL BAYAR - LANGSUNG REDIRECT KE STRUK ==========
+    btnBayar.addEventListener('click', async function(e) {
+        e.preventDefault();
+        const metode = metodeSelect.value;
+        const diskon = getAngka(diskonInput.value);
+        const subtotal = Math.max(totalHarga - diskon, 0);
+        const dibayar = getAngka(dibayarInput.value);
 
-            // Cek apakah ada transaksi Midtrans yang sedang berjalan
-            if (!currentOrderId) {
+        // Validasi Cash
+        if (metode === 'cash') {
+            if (!dibayar || dibayar === 0) {
                 Swal.fire({
-                    title: "Tidak Ada Transaksi",
-                    text: "Tidak ada transaksi yang perlu dibatalkan.",
-                    icon: "info",
-                    confirmButtonColor: "#3b82f6",
+                    icon: 'warning',
+                    title: 'Nominal Dibayar Kosong',
+                    text: 'Silakan masukkan nominal yang dibayar!',
+                    confirmButtonColor: '#3085d6'
                 });
                 return;
             }
 
-            const result = await Swal.fire({
-                title: "Batalkan Pembayaran?",
-                html: `
-                    <p>Pilih cara pembatalan transaksi:</p>
-                    <div class="mt-4 space-y-2">
-                        <button id="btn-cancel-midtrans" class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                            Batalkan di Midtrans
-                        </button>
-                        <button id="btn-cancel-local" class="w-full bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                            Batalkan Lokal Saja
-                        </button>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-3">Order ID: ${currentOrderId}</p>
-                `,
-                icon: "warning",
-                showCancelButton: true,
-                showConfirmButton: false,
-                cancelButtonText: "Batal",
-                cancelButtonColor: "#6b7280",
-                didOpen: () => {
-                    // Handler untuk tombol batalkan di Midtrans
-                    document.getElementById('btn-cancel-midtrans').addEventListener('click',
-                        async () => {
-                            Swal.close();
-                            await cancelViaMidtrans();
-                        });
+            if (dibayar < subtotal) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Nominal Kurang',
+                    html: `
+                        <p>Nominal yang dibayar kurang dari total tagihan.</p>
+                        <p class="mt-2"><strong>Total: ${formatRupiah(subtotal)}</strong></p>
+                        <p><strong>Dibayar: ${formatRupiah(dibayar)}</strong></p>
+                    `,
+                    confirmButtonColor: '#3085d6'
+                });
+                return;
+            }
 
-                    // Handler untuk tombol batalkan lokal
-                    document.getElementById('btn-cancel-local').addEventListener('click', () => {
-                        Swal.close();
-                        cancelLocal();
-                    });
-                }
-            });
-        });
+            // Proses Cash langsung ke backend
+            btnBayar.disabled = true;
+            btnBayar.textContent = 'Memproses...';
 
-        // Function untuk cancel via Midtrans API
-        async function cancelViaMidtrans() {
-            // Tampilkan loading
-            Swal.fire({
-                title: 'Membatalkan...',
-                text: 'Sedang membatalkan transaksi di Midtrans',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+            const formData = new FormData(checkoutForm);
+            formData.set('total', subtotal);
+            formData.set('diskon', diskon);
+            formData.set('dibayar', dibayar);
+            formData.set('metode_bayar', 'cash');
 
             try {
-                const response = await fetch("{{ route('kasir.midtrans.cancel') }}", {
+                const response = await fetch(checkoutForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.transaksi_id) {
+                    // ✅ LANGSUNG REDIRECT KE STRUK TANPA SWAL
+                    window.location.href = `/kasir/transaksi/struk/${data.transaksi_id}`;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: data.message || 'Terjadi kesalahan',
+                        confirmButtonColor: '#ef4444'
+                    });
+                    btnBayar.disabled = false;
+                    btnBayar.textContent = 'Bayar Sekarang';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: 'Terjadi kesalahan saat memproses pembayaran',
+                    confirmButtonColor: '#ef4444'
+                });
+                btnBayar.disabled = false;
+                btnBayar.textContent = 'Bayar Sekarang';
+            }
+            return;
+        }
+
+        // ========== CASHLESS/DEBIT - MIDTRANS ==========
+        if (metode === 'debit') {
+            btnBayar.disabled = true;
+            btnBayar.textContent = 'Memproses...';
+
+            try {
+                // Request token ke backend
+                const response = await fetch("{{ route('kasir.midtrans.token') }}", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": "{{ csrf_token() }}"
                     },
                     body: JSON.stringify({
-                        order_id: currentOrderId
+                        total: subtotal,
+                        diskon: diskon
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.status === 'success') {
-                    Swal.fire({
-                        title: "Dibatalkan!",
-                        text: data.message,
-                        icon: "success",
-                        confirmButtonColor: "#22c55e",
-                    }).then(() => {
-                        currentOrderId = null;
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        title: "Gagal Membatalkan",
-                        html: `
-                            <p>${data.message}</p>
-                            <p class="text-sm text-gray-600 mt-2">Order ID: ${currentOrderId}</p>
-                            <p class="text-xs text-gray-500 mt-2">Tip: Transaksi akan expired otomatis dalam 24 jam</p>
-                        `,
-                        icon: "error",
-                        confirmButtonColor: "#ef4444",
-                    });
-                    console.error('Error response:', data);
+                if (!data.token) {
+                    throw new Error('Token tidak ditemukan');
                 }
-            } catch (error) {
-                Swal.fire({
-                    title: "Error",
-                    text: "Terjadi kesalahan saat membatalkan pembayaran: " + error.message,
-                    icon: "error",
-                    confirmButtonColor: "#ef4444",
-                });
-                console.error('Catch error:', error);
-            }
-        }
 
-        // Function untuk cancel lokal (tanpa API Midtrans)
-        function cancelLocal() {
-            Swal.fire({
-                title: "Transaksi Dibatalkan",
-                html: `
-                    <p>Transaksi lokal telah dibatalkan.</p>
-                    <p class="text-sm text-gray-600 mt-2">Transaksi di Midtrans akan expired otomatis dalam 24 jam.</p>
-                `,
-                icon: "info",
-                confirmButtonColor: "#3b82f6",
-            }).then(() => {
-                currentOrderId = null;
-                location.reload();
-            });
-        }
+                // Simpan order_id untuk cancel
+                currentOrderId = data.order_id;
 
-        // ✅ Submit pembayaran - DIPERBAIKI
-        btnBayar.addEventListener('click', async function(e) {
-            e.preventDefault();
-            const metode = metodeSelect.value;
-            const total = totalHarga;
-            const diskon = getAngka(diskonInput.value);
-            const subtotal = Math.max(total - diskon, 0);
-            const dibayar = getAngka(dibayarInput.value);
-
-            // Validasi Cash manual
-            if (metode !== 'debit' && dibayar < subtotal) {
-                Swal.fire({
-                    title: "Nominal Kurang!",
-                    text: "Nominal dibayar kurang dari subtotal!",
-                    icon: "warning",
-                    confirmButtonColor: "#ef4444",
-                });
-                return;
-            }
-
-            // 🔹 Kalau Debit → Snap Midtrans
-            if (metode === 'debit') {
-                try {
-                    const res = await fetch("{{ route('kasir.midtrans.token') }}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        },
-                        body: JSON.stringify({
-                            total: subtotal
-                        })
-                    });
-                    const data = await res.json();
-
-                    // Simpan order_id untuk bisa dibatalkan
-                    currentOrderId = data.order_id;
-
-                    snap.pay(data.token, {
-                        onSuccess: function(result) {
-                            // Simpan transaksi ke backend
-                            fetch("{{ route('kasir.transaksi.checkout') }}", {
+                // Buka Midtrans Snap
+                snap.pay(data.token, {
+                    onSuccess: async function(result) {
+                        // Simpan transaksi ke backend
+                        try {
+                            const saveResponse = await fetch("{{ route('kasir.transaksi.checkout') }}", {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
@@ -401,156 +347,366 @@
                                     order_id: data.order_id,
                                     payment_result: result
                                 })
-                            }).then(() => {
+                            });
+
+                            const saveData = await saveResponse.json();
+
+                            if (saveData.success) {
                                 Swal.fire({
-                                    title: "Pembayaran Berhasil!",
-                                    text: "Transaksi debit telah selesai.",
-                                    icon: "success",
-                                    confirmButtonColor: "#22c55e",
+                                    icon: 'success',
+                                    title: 'Pembayaran Berhasil!',
+                                    text: 'Transaksi cashless telah selesai.',
+                                    confirmButtonColor: '#10b981',
+                                    confirmButtonText: 'Cetak Struk'
                                 }).then(() => {
-                                    tombolCetak.classList.remove("hidden");
-                                    btnBayar.disabled = true;
-                                    btnBatal.disabled = true;
-                                    // Reset order ID karena sudah berhasil
-                                    currentOrderId = null;
+                                    // Redirect ke halaman cetak struk
+                                    if (saveData.transaksi_id) {
+                                        window.location.href = `/kasir/transaksi/struk/${saveData.transaksi_id}`;
+                                    } else {
+                                        location.reload();
+                                    }
                                 });
-                            });
-                        },
-                        onPending: function(result) {
+                            } else {
+                                throw new Error(saveData.message || 'Gagal menyimpan transaksi');
+                            }
+                        } catch (error) {
+                            console.error('Error saving transaction:', error);
                             Swal.fire({
-                                title: "Menunggu Pembayaran",
-                                text: "Status: Pending",
-                                icon: "info",
-                                confirmButtonColor: "#3b82f6",
+                                icon: 'error',
+                                title: 'Gagal Menyimpan',
+                                text: 'Pembayaran berhasil tapi gagal menyimpan ke database',
+                                confirmButtonColor: '#ef4444'
                             });
-                        },
-                        onError: function(result) {
-                            Swal.fire({
-                                title: "Gagal!",
-                                text: "Terjadi kesalahan pembayaran.",
-                                icon: "error",
-                                confirmButtonColor: "#ef4444",
-                            });
-                            console.error(result);
-                            // Reset order ID karena error
-                            currentOrderId = null;
-                        },
-                        onClose: function() {
-                            Swal.fire({
-                                title: "Pop-up Ditutup",
-                                text: "Kamu menutup pop-up sebelum pembayaran selesai. Gunakan tombol 'Batalkan Pembayaran' untuk membatalkan transaksi di Midtrans.",
-                                icon: "warning",
-                                confirmButtonColor: "#f59e0b",
-                            });
-                            // Order ID tetap tersimpan untuk bisa dibatalkan
                         }
-                    });
-                } catch (error) {
-                    Swal.fire({
-                        title: "Error",
-                        text: "Gagal membuat token Midtrans.",
-                        icon: "error",
-                        confirmButtonColor: "#ef4444",
-                    });
-                    console.error(error);
-                    currentOrderId = null;
-                }
-                return;
+                    },
+                    onPending: function(result) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Menunggu Pembayaran',
+                            text: 'Status: Pending. Silakan selesaikan pembayaran.',
+                            confirmButtonColor: '#3b82f6'
+                        });
+                        btnBayar.disabled = false;
+                        btnBayar.textContent = 'Bayar Sekarang';
+                    },
+                    onError: function(result) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Pembayaran Gagal',
+                            text: 'Terjadi kesalahan saat memproses pembayaran.',
+                            confirmButtonColor: '#ef4444'
+                        });
+                        console.error(result);
+                        currentOrderId = null;
+                        btnBayar.disabled = false;
+                        btnBayar.textContent = 'Bayar Sekarang';
+                    },
+                    onClose: function() {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Pop-up Ditutup',
+                            text: 'Anda menutup jendela pembayaran. Gunakan tombol "Batalkan Pembayaran" untuk membatalkan transaksi.',
+                            confirmButtonColor: '#f59e0b'
+                        });
+                        btnBayar.disabled = false;
+                        btnBayar.textContent = 'Bayar Sekarang';
+                    }
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: 'Gagal membuat token Midtrans: ' + error.message,
+                    confirmButtonColor: '#ef4444'
+                });
+                currentOrderId = null;
+                btnBayar.disabled = false;
+                btnBayar.textContent = 'Bayar Sekarang';
             }
+        }
+    });
 
-            // 🔹 Kalau Cash manual tetap sama
-            checkoutForm.submit();
+    // ========== TOMBOL BATAL ==========
+    btnBatal.addEventListener("click", async function(e) {
+        e.preventDefault();
+
+        if (!currentOrderId) {
+            Swal.fire({
+                title: "Tidak Ada Transaksi",
+                text: "Tidak ada transaksi yang perlu dibatalkan.",
+                icon: "info",
+                confirmButtonColor: "#3b82f6",
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: "Batalkan Pembayaran?",
+            html: `
+                <p>Pilih cara pembatalan transaksi:</p>
+                <div class="mt-4 space-y-2">
+                    <button id="btn-cancel-midtrans" class="w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                        Batalkan di Midtrans
+                    </button>
+                    <button id="btn-cancel-local" class="w-full bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                        Batalkan Lokal Saja
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">Order ID: ${currentOrderId}</p>
+            `,
+            icon: "warning",
+            showCancelButton: true,
+            showConfirmButton: false,
+            cancelButtonText: "Batal",
+            cancelButtonColor: "#6b7280",
+            didOpen: () => {
+                document.getElementById('btn-cancel-midtrans').addEventListener('click', async () => {
+                    Swal.close();
+                    await cancelViaMidtrans();
+                });
+
+                document.getElementById('btn-cancel-local').addEventListener('click', () => {
+                    Swal.close();
+                    cancelLocal();
+                });
+            }
         });
-    </script>
-    <script>
-        document.querySelectorAll(".update-cart-form").forEach(form => {
-            const stok = parseInt(form.dataset.stok);
-            const qtySpan = form.querySelector(".qty-text");
-            const btnPlus = form.querySelector(".btn-plus");
-            const btnMinus = form.querySelector(".btn-minus");
+    });
 
-            let qty = parseInt(qtySpan.innerText);
+    async function cancelViaMidtrans() {
+        Swal.fire({
+            title: 'Membatalkan...',
+            text: 'Sedang membatalkan transaksi di Midtrans',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-            // ✅ Buat hidden input untuk qty
-            let qtyInput = form.querySelector('input[name="qty"]');
-            if (!qtyInput) {
-                qtyInput = document.createElement('input');
-                qtyInput.type = 'hidden';
-                qtyInput.name = 'qty';
-                form.appendChild(qtyInput);
+        try {
+            const response = await fetch("{{ route('kasir.midtrans.cancel') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    order_id: currentOrderId
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                Swal.fire({
+                    title: "Dibatalkan!",
+                    text: data.message,
+                    icon: "success",
+                    confirmButtonColor: "#22c55e",
+                }).then(() => {
+                    currentOrderId = null;
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: "Gagal Membatalkan",
+                    html: `
+                        <p>${data.message}</p>
+                        <p class="text-sm text-gray-600 mt-2">Order ID: ${currentOrderId}</p>
+                    `,
+                    icon: "error",
+                    confirmButtonColor: "#ef4444",
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: "Error",
+                text: "Terjadi kesalahan: " + error.message,
+                icon: "error",
+                confirmButtonColor: "#ef4444",
+            });
+        }
+    }
+
+    function cancelLocal() {
+        Swal.fire({
+            title: "Transaksi Dibatalkan",
+            html: `
+                <p>Transaksi lokal telah dibatalkan.</p>
+                <p class="text-sm text-gray-600 mt-2">Transaksi di Midtrans akan expired otomatis.</p>
+            `,
+            icon: "info",
+            confirmButtonColor: "#3b82f6",
+        }).then(() => {
+            currentOrderId = null;
+            location.reload();
+        });
+    }
+
+    // ========== AJAX UPDATE QUANTITY (TANPA RELOAD!) ==========
+    document.querySelectorAll(".update-cart-form").forEach(form => {
+        const stok = parseInt(form.dataset.stok);
+        const qtySpan = form.querySelector(".qty-text");
+        const btnPlus = form.querySelector(".btn-plus");
+        const btnMinus = form.querySelector(".btn-minus");
+
+        let qty = parseInt(qtySpan.innerText);
+
+        // Buat hidden input untuk qty
+        let qtyInput = form.querySelector('input[name="qty"]');
+        if (!qtyInput) {
+            qtyInput = document.createElement('input');
+            qtyInput.type = 'hidden';
+            qtyInput.name = 'qty';
+            form.appendChild(qtyInput);
+        }
+
+        function updateDisplay() {
+            qtySpan.innerText = qty;
+            qtyInput.value = qty;
+
+            if (qty >= stok) {
+                btnPlus.disabled = true;
+                btnPlus.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnPlus.disabled = false;
+                btnPlus.classList.remove('opacity-50', 'cursor-not-allowed');
             }
 
-            function updateDisplay() {
-                qtySpan.innerText = qty;
-                qtyInput.value = qty; // ✅ Update value hidden input
-
-                // ✅ Disable tombol sesuai kondisi
-                if (qty >= stok) {
-                    btnPlus.disabled = true;
-                    btnPlus.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    btnPlus.disabled = false;
-                    btnPlus.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-
-                if (qty <= 1) {
-                    btnMinus.disabled = true;
-                    btnMinus.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    btnMinus.disabled = false;
-                    btnMinus.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
+            if (qty <= 1) {
+                btnMinus.disabled = true;
+                btnMinus.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnMinus.disabled = false;
+                btnMinus.classList.remove('opacity-50', 'cursor-not-allowed');
             }
+        }
 
-            btnPlus.addEventListener("click", function() {
-                if (qty < stok) {
-                    qty++;
-                    updateDisplay();
-                    form.submit(); // submit otomatis ke backend
-                } else {
-                    // ✅ Alert SweetAlert ketika stok habis
+        // ⚠️ PENTING: AJAX UPDATE - TIDAK RELOAD HALAMAN!
+        function sendUpdateAjax(newQty) {
+            const formData = new FormData(form);
+            formData.set('qty', newQty);
+
+            btnPlus.disabled = true;
+            btnMinus.disabled = true;
+
+            fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        qty = newQty;
+                        updateDisplay();
+                        updateRingkasanBelanja(data.cart);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: data.message || 'Terjadi kesalahan'
+                        });
+                        btnPlus.disabled = false;
+                        btnMinus.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     Swal.fire({
-                        icon: "error",
-                        title: "Stok Tidak Mencukupi!",
-                        html: `
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Terjadi kesalahan saat memperbarui keranjang'
+                    });
+                    btnPlus.disabled = false;
+                    btnMinus.disabled = false;
+                });
+        }
+
+        // ⚠️ UPDATE RINGKASAN BELANJA TANPA RELOAD
+        function updateRingkasanBelanja(cart) {
+            let newTotal = 0;
+            let totalItems = 0;
+
+            Object.values(cart).forEach(item => {
+                newTotal += item.qty * item.harga;
+                totalItems += item.qty;
+            });
+
+            // Update total harga
+            document.getElementById('total-harga').textContent = formatRupiah(newTotal);
+            document.getElementById('total-input').value = newTotal;
+
+            // Update jumlah barang
+            const ringkasanText = document.querySelector('.text-sm.mb-2 span:first-child');
+            if (ringkasanText) {
+                ringkasanText.textContent = `Total Harga (${totalItems} Barang)`;
+            }
+
+            // Hitung ulang subtotal dengan diskon
+            const diskon = getAngka(diskonInput.value);
+            const subtotal = Math.max(newTotal - diskon, 0);
+            subtotalText.textContent = formatRupiah(subtotal);
+
+            // ⚠️ UPDATE GLOBAL VARIABLE!
+            totalHarga = newTotal;
+        }
+
+        // Handler tombol Plus
+        btnPlus.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            if (qty < stok) {
+                sendUpdateAjax(qty + 1); // ⚠️ AJAX, BUKAN form.submit()!
+            } else {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Stok Tidak Mencukupi!",
+                    html: `
                         <p>Jumlah yang Anda pilih sudah mencapai batas stok.</p>
                         <p class="text-sm text-gray-600 mt-2">Stok tersedia: <strong>${stok}</strong></p>
                     `,
-                        confirmButtonColor: "#ef4444",
-                        confirmButtonText: "OK"
-                    });
-                }
-            });
+                    confirmButtonColor: "#ef4444"
+                });
+            }
+        });
 
-            btnMinus.addEventListener("click", function() {
-                if (qty > 1) {
-                    qty--;
-                    updateDisplay();
-                    form.submit(); // ✅ Submit dengan qty yang sudah dikurangi
-                } else {
-                    // ✅ Alert jika ingin mengurangi qty = 1
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Hapus Item?",
-                        text: "Jumlah minimal adalah 1. Apakah Anda ingin menghapus item ini dari keranjang?",
-                        showCancelButton: true,
-                        confirmButtonColor: "#ef4444",
-                        cancelButtonColor: "#6b7280",
-                        confirmButtonText: "Ya, Hapus",
-                        cancelButtonText: "Batal"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Submit form hapus
-                            const formId = form.closest('.flex.items-start').querySelector(
-                                    'button[onclick*="remove-"]')
-                                .getAttribute('onclick').match(/remove-(\d+)/)[1];
+        // Handler tombol Minus
+        btnMinus.addEventListener("click", function(e) {
+            e.preventDefault();
+
+            if (qty > 1) {
+                sendUpdateAjax(qty - 1); // ⚠️ AJAX, BUKAN form.submit()!
+            } else {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Hapus Item?",
+                    text: "Jumlah minimal adalah 1. Apakah Anda ingin menghapus item ini dari keranjang?",
+                    showCancelButton: true,
+                    confirmButtonColor: "#ef4444",
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Ya, Hapus",
+                    cancelButtonText: "Batal"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const itemCard = form.closest('.flex.items-start');
+                        const removeButton = itemCard.querySelector('button[onclick*="remove-"]');
+                        if (removeButton) {
+                            const formId = removeButton.getAttribute('onclick').match(/remove-(\d+)/)[1];
                             document.getElementById('remove-' + formId).submit();
                         }
-                    });
-                }
-            });
-
-            updateDisplay(); // awal
+                    }
+                });
+            }
         });
-    </script>
+
+        updateDisplay();
+    });
+</script>
 @endsection

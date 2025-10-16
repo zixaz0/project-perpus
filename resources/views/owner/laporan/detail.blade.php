@@ -7,7 +7,7 @@
             <li class="mx-2">/</li>
             <li><a href="{{ route('owner.laporan.index') }}" class="text-blue-600 hover:underline">Laporan Penjualan</a></li>
             <li class="mx-2">/</li>
-            <li><span class="text-gray-600">Detail Transaksi</span></li>
+            <li><span class="text-blue-600 hover:underline">Detail Transaksi</span></li>
         </ol>
     </nav>
 @endsection
@@ -15,7 +15,8 @@
 @section('content')
 <div class="max-w-4xl mx-auto px-6 py-10">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">🧾 Detail Transaksi</h1>
+        <h1 class="text-3xl font-bold text-gray-800">
+            <i class="fas fa-list text-indigo-600"></i> Detail Transaksi</h1>
         <a href="{{ route('owner.laporan.index') }}" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
@@ -49,7 +50,8 @@
     <!-- Daftar Item -->
     <div class="bg-white rounded-xl shadow-md border overflow-hidden mb-6">
         <div class="p-6 border-b bg-gray-50">
-            <h2 class="text-xl font-bold text-gray-800">📚 Item Buku</h2>
+            <h2 class="text-xl font-bold text-gray-800">
+                <i class="fas fa-book text-indigo-600"></i> Item Buku</h2>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -96,7 +98,8 @@
 
     <!-- Ringkasan Pembayaran -->
     <div class="bg-white p-6 rounded-xl shadow-md border">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">💰 Ringkasan Pembayaran</h2>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-money-bill text-indigo-600"></i> Ringkasan Pembayaran</h2>
         <div class="space-y-3">
             <div class="flex justify-between text-gray-700">
                 <span>Total Harga:</span>

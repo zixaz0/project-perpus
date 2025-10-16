@@ -1,15 +1,5 @@
 @extends('layouts.app')
 
-@section('breadcrumb')
-    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
-        <ol class="flex items-center space-x-2">
-            <li>
-                <span class="text-indigo-600 font-medium">Dashboard</span>
-            </li>
-        </ol>
-    </nav>
-@endsection
-
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
     <!-- Header -->
@@ -134,7 +124,7 @@
         <!-- Buku Terlaris -->
         <div class="bg-white rounded-xl shadow-md border p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <i class="fas fa-fire text-red-500"></i>
+                <i class="fas fa-fire text-indigo-600"></i>
                 Top 5 Buku Terlaris Bulan Ini
             </h2>
             <div class="space-y-3">
@@ -190,7 +180,7 @@
             <!-- Stok Menipis -->
             <div class="bg-white rounded-xl shadow-md border p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                    <i class="fas fa-exclamation-triangle text-indigo-600"></i>
                     Stok Menipis (< 10)
                 </h2>
                 <div class="space-y-2">
@@ -224,7 +214,7 @@
             <!-- Stok Habis -->
             <div class="bg-white rounded-xl shadow-md border p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <i class="fas fa-times-circle text-red-500"></i>
+                    <i class="fas fa-times-circle text-indigo-600"></i>
                     Stok Habis
                 </h2>
                 <div class="space-y-2">

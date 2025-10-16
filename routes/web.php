@@ -81,7 +81,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
     Route::get('/owner/buku/index', [BukuController::class, 'indexowner'])->name('owner.buku.index');
     Route::get('/owner/pegawai/index', [OwnerPegawaiController::class, 'index'])->name('owner.pegawai.index');
     Route::get('/owner/laporan_penjualan', [LaporanController::class, 'index'])->name('owner.laporan.index');
-    Route::get('/owner/laporan_penjualan/detail', [LaporanController::class, 'detail'])->name('owner.laporan.detail');
+    Route::get('/owner/laporan_penjualan/detail/{id}', [LaporanController::class, 'detail'])->name('owner.laporan.detail');
     Route::get('/owner/laporan_penjualan/print', [LaporanController::class, 'print'])->name('owner.laporan.print');
     Route::prefix('owner')
         ->name('owner.')
@@ -95,8 +95,6 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
         Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('owner.logs.show');
     });
 });
-
-// Tambahkan ini ke dalam group kasir yang sudah ada di web.php
 
 Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
     ->prefix('kasir')

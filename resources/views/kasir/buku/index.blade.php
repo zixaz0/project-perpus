@@ -17,7 +17,7 @@
 @section('content')
     <div class="container mx-auto px-6 py-8 flex gap-6">
         <!-- Main Content -->
-        <div class="flex-1">
+        <div class="flex-1 transition-all duration-300" id="mainContent">
             <!-- Header -->
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-3xl font-bold text-gray-800">
@@ -69,7 +69,7 @@
             </div>
 
             <!-- Grid Buku -->
-            <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="bookGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @php $cart = session('cart', []); @endphp
                 @forelse($buku as $item)
                     @php
@@ -79,7 +79,8 @@
                     <div class="book-card relative bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-4 flex flex-col
                     {{ $stok <= 0 ? 'opacity-50' : 'hover:-translate-y-1' }}"
                         data-title="{{ strtolower($item->judul_buku) }} {{ strtolower($item->kode_buku) }} {{ strtolower($item->kategori->kategori ?? '') }}"
-                        data-stok="{{ $stok }}">
+                        data-stok="{{ $stok }}"
+                        data-book-id="{{ $item->id }}">
 
                         <div class="relative w-full mb-4" style="padding-top: 150%;">
                             <img src="{{ asset('storage/' . $item->cover_buku) }}" alt="cover {{ $item->judul_buku }}"
@@ -118,7 +119,7 @@
                         </div>
 
                         <!-- Tombol Aksi -->
-                        <div class="mt-auto flex gap-2">
+                        <div class="mt-auto flex gap-2" id="actions-{{ $item->id }}">
                             <!-- Tombol Detail -->
                             <button onclick="showDetail({{ $item->id }})"
                                 class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg shadow-md transition-all duration-200 font-medium cursor-pointer hover:shadow-lg">
@@ -128,7 +129,7 @@
                             @if ($stok > 0)
                                 @if (!$inCart)
                                     <!-- Tombol Add to Cart -->
-                                    <form action="{{ route('kasir.transaksi.add', $item->id) }}" method="POST"
+                                    <form action="{{ route('kasir.transaksi.add', $item) }}" method="POST"
                                         class="w-1/2 add-cart-form">
                                         @csrf
                                         <button type="submit"
@@ -138,15 +139,16 @@
                                     </form>
                                 @else
                                     <!-- Counter Quantity -->
-                                    <form action="{{ route('kasir.transaksi.update', $item->id) }}" method="POST"
+                                    <form action="{{ route('kasir.transaksi.update', $item) }}" method="POST"
                                         class="flex w-1/2 border-2 border-gray-200 rounded-lg overflow-hidden update-cart-form"
-                                        data-stok="{{ $stok }}">
+                                        data-stok="{{ $stok }}"
+                                        data-book-id="{{ $item->id }}">
                                         @csrf
                                         @method('PATCH')
                                         <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] - 1 }}"
-                                            class="px-3 bg-gray-100 hover:bg-gray-200 cursor-pointer transition font-bold text-gray-700">−</button>
+                                            class="px-3 bg-gray-100 hover:bg-gray-200 cursor-pointer transition font-bold text-gray-700 btn-minus">−</button>
                                         <span
-                                            class="flex-1 text-center py-2 font-semibold text-gray-800 bg-white">{{ $cart[$item->id]['qty'] }}</span>
+                                            class="flex-1 text-center py-2 font-semibold text-gray-800 bg-white qty-display">{{ $cart[$item->id]['qty'] }}</span>
                                         <button type="submit" name="qty" value="{{ $cart[$item->id]['qty'] + 1 }}"
                                             class="px-3 bg-gray-100 hover:bg-gray-200 cursor-pointer transition font-bold text-gray-700 btn-plus">+</button>
                                     </form>
@@ -169,9 +171,10 @@
             </div>
         </div>
 
-        <!-- 🛒 SIDEBAR CART -->
-        <div id="cartSidebar" class="hidden lg:block w-96 flex-shrink-0">
-            <div class="sticky top-6 bg-white rounded-xl shadow-2xl overflow-hidden border-2 border-gray-200">
+        <!-- 🛒 SIDEBAR CART (Desktop) -->
+        <div id="cartSidebar" class="hidden lg:block fixed right-0 top-0 h-full transition-all duration-300 ease-in-out z-40"
+             style="width: 384px; transform: translateX(384px);">
+            <div class="h-full bg-white shadow-2xl border-l-2 border-gray-200 flex flex-col">
                 <!-- Header -->
                 <div class="bg-gradient-to-r from-green-600 to-green-700 p-5 text-white">
                     <div class="flex items-center justify-between">
@@ -186,16 +189,12 @@
                             class="group relative cursor-pointer hover:bg-green-800 p-2 rounded-lg transition"
                             title="Kosongkan keranjang">
                             <i class="fas fa-trash-alt text-lg"></i>
-                            <span
-                                class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                                Kosongkan
-                            </span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Cart Items -->
-                <div id="cartItems" class="p-4 space-y-3 max-h-[calc(100vh-400px)] overflow-y-auto">
+                <div id="cartItems" class="flex-1 p-4 space-y-3 overflow-y-auto">
                     <div class="text-center py-12 text-gray-400">
                         <i class="fas fa-shopping-basket text-5xl mb-3"></i>
                         <p class="text-sm">Keranjang masih kosong</p>
@@ -221,6 +220,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- 🔘 Desktop Cart Toggle Button -->
+        <button id="desktopCartToggle" onclick="toggleDesktopCart()"
+            class="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white px-3 py-4 rounded-l-xl shadow-2xl items-center justify-center z-50 transition-all duration-300"
+            style="transform: translateY(-50%);">
+            <div class="flex flex-col items-center gap-2">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="desktopCartBadge"
+                    class="hidden bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">0</span>
+                <i id="toggleIcon" class="fas fa-chevron-left text-sm"></i>
+            </div>
+        </button>
 
         <!-- 📱 Mobile Cart Button (Floating) -->
         <button id="mobileCartBtn" onclick="toggleMobileCart()"
@@ -280,10 +291,10 @@
         </div>
     </div>
 
+    <!-- Toggle Script -->
     <script>
-        // Toggle untuk menampilkan/menyembunyikan buku yang stok habis
         document.getElementById('toggleAvailable').addEventListener('change', function() {
-            const bookCards = document.querySelectorAll('.book-card');
+            const bookCards = document.querySelectorAll('.book-card ');
             bookCards.forEach(card => {
                 const stok = parseInt(card.getAttribute('data-stok'));
                 if (this.checked) {
@@ -310,6 +321,26 @@
     <script>
         const cart = {!! json_encode($cart) !!};
         const allBooks = @json($buku->items());
+        let isCartOpen = false;
+
+        // 🔄 Toggle Desktop Cart
+        function toggleDesktopCart() {
+            const sidebar = document.getElementById('cartSidebar');
+            const toggleBtn = document.getElementById('desktopCartToggle');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            isCartOpen = !isCartOpen;
+            
+            if (isCartOpen) {
+                sidebar.style.transform = 'translateX(0)';
+                toggleBtn.style.right = '384px';
+                toggleIcon.className = 'fas fa-chevron-right text-sm';
+            } else {
+                sidebar.style.transform = 'translateX(384px)';
+                toggleBtn.style.right = '0';
+                toggleIcon.className = 'fas fa-chevron-left text-sm';
+            }
+        }
 
         // 🛒 Render Cart Sidebar
         function renderCart() {
@@ -332,6 +363,9 @@
                 cartSummary.classList.add('hidden');
                 mobileCartSummary.classList.add('hidden');
                 document.getElementById('mobileCartBadge').classList.add('hidden');
+                document.getElementById('desktopCartBadge').classList.add('hidden');
+                document.getElementById('cartSidebar').classList.add('hidden');
+                document.getElementById('desktopCartToggle').classList.add('hidden');
                 return;
             }
 
@@ -379,11 +413,15 @@
             cartSummary.classList.remove('hidden');
             mobileCartSummary.classList.remove('hidden');
 
-            const badge = document.getElementById('mobileCartBadge');
-            badge.textContent = totalQty;
-            badge.classList.remove('hidden');
+            const mobileBadge = document.getElementById('mobileCartBadge');
+            const desktopBadge = document.getElementById('desktopCartBadge');
+            mobileBadge.textContent = totalQty;
+            desktopBadge.textContent = totalQty;
+            mobileBadge.classList.remove('hidden');
+            desktopBadge.classList.remove('hidden');
 
             document.getElementById('cartSidebar').classList.remove('hidden');
+            document.getElementById('desktopCartToggle').classList.remove('hidden');
         }
 
         renderCart();
@@ -409,7 +447,6 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Submit form DELETE
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = '{{ route('kasir.transaksi.clear') }}';
@@ -432,24 +469,154 @@
             });
         }
 
-        // Batasi qty agar tidak melebihi stok
-        document.querySelectorAll(".update-cart-form").forEach(form => {
-            form.addEventListener("submit", function(e) {
-                const stok = parseInt(this.dataset.stok);
-                const plusButton = this.querySelector(".btn-plus");
-                const currentQty = parseInt(this.querySelector("span").innerText);
+        // ============ AJAX HANDLERS ============
 
-                if (document.activeElement === plusButton && currentQty >= stok) {
-                    e.preventDefault();
+        // Handle Add to Cart dengan AJAX
+        document.querySelectorAll(".add-cart-form").forEach(form => {
+            form.addEventListener("submit", function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const button = this.querySelector('button');
+                const originalHTML = button.innerHTML;
+                
+                button.disabled = true;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Object.keys(cart).forEach(key => delete cart[key]);
+                        Object.assign(cart, data.cart);
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    button.disabled = false;
+                    button.innerHTML = originalHTML;
                     Swal.fire({
-                        icon: "warning",
-                        title: "Stok terbatas!",
-                        text: `Jumlah tidak boleh melebihi stok (${stok}).`,
-                        confirmButtonColor: "#2563eb"
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Terjadi kesalahan saat menambahkan ke keranjang'
                     });
-                }
+                });
             });
         });
+
+        // Handle Update Cart dengan AJAX
+        document.querySelectorAll(".update-cart-form").forEach(form => {
+            const plusButton = form.querySelector(".btn-plus");
+            const minusButton = form.querySelector(".btn-minus");
+            
+            [plusButton, minusButton].forEach(button => {
+                button.addEventListener("click", function(e) {
+                    e.preventDefault();
+                    
+                    const stok = parseInt(form.dataset.stok);
+                    const bookId = form.dataset.bookId;
+                    const qtyDisplay = form.querySelector(".qty-display");
+                    const currentQty = parseInt(qtyDisplay.textContent);
+                    const newQty = parseInt(this.value);
+
+                    if (this === plusButton && currentQty >= stok) {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Stok terbatas!",
+                            text: `Jumlah tidak boleh melebihi stok (${stok}).`,
+                            confirmButtonColor: "#2563eb"
+                        });
+                        return;
+                    }
+
+                    if (newQty <= 0) {
+                        Swal.fire({
+                            title: 'Hapus dari keranjang?',
+                            text: "Item akan dihapus dari keranjang",
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#dc2626',
+                            cancelButtonColor: '#6b7280',
+                            confirmButtonText: 'Ya, Hapus!',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                sendUpdateRequest(form, newQty, plusButton, minusButton, qtyDisplay, bookId);
+                            }
+                        });
+                        return;
+                    }
+
+                    sendUpdateRequest(form, newQty, plusButton, minusButton, qtyDisplay, bookId);
+                });
+            });
+        });
+
+        function sendUpdateRequest(form, newQty, plusButton, minusButton, qtyDisplay, bookId) {
+            plusButton.disabled = true;
+            minusButton.disabled = true;
+            
+            const formData = new FormData(form);
+            formData.set('qty', newQty);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Object.keys(cart).forEach(key => delete cart[key]);
+                    Object.assign(cart, data.cart);
+                    
+                    if (newQty <= 0 || !data.cart[bookId]) {
+                        location.reload();
+                        return;
+                    }
+                    
+                    qtyDisplay.textContent = newQty;
+                    minusButton.value = newQty - 1;
+                    plusButton.value = newQty + 1;
+                    renderCart();
+                    
+                    plusButton.disabled = false;
+                    minusButton.disabled = false;
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: data.message || 'Terjadi kesalahan'
+                    });
+                    plusButton.disabled = false;
+                    minusButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: 'Terjadi kesalahan saat memperbarui keranjang'
+                });
+                plusButton.disabled = false;
+                minusButton.disabled = false;
+            });
+        }
 
         // 📖 Detail buku
         function showDetail(id) {

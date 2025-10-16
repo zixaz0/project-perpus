@@ -61,7 +61,7 @@ class KasirController extends Controller
                 ];
             });
         
-        // 7. Buku Terlaris Minggu Ini
+        // 7. Buku Terlaris Minggu Ini (DENGAN COVER BUKU)
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
         
@@ -78,6 +78,7 @@ class KasirController extends Controller
                 return (object)[
                     'judul' => $item->buku->judul_buku ?? 'Judul Buku',
                     'penulis' => $item->buku->pengarang ?? 'Penulis',
+                    'cover_buku' => $item->buku->cover_buku ?? null, // TAMBAH COVER
                     'total_terjual' => $item->total_terjual
                 ];
             });

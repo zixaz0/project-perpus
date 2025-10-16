@@ -46,19 +46,19 @@
 
     <!-- Statistik Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm opacity-90 mb-1">Total Transaksi</p>
                     <h3 class="text-3xl font-bold">{{ number_format($total_transaksi) }}</h3>
                 </div>
-                <div class= bg-opacity-20 p-3 rounded-lg">
+                <div class="bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-receipt text-3xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg">
+        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm opacity-90 mb-1">Total Pendapatan</p>
@@ -70,49 +70,81 @@
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-lg">
+        <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm opacity-90 mb-1">Total Diskon</p>
                     <h3 class="text-3xl font-bold">Rp {{ number_format($total_diskon, 0, ',', '.') }}</h3>
                 </div>
-                <div class=" bg-opacity-20 p-3 rounded-lg">
+                <div class="bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-tag text-3xl"></i>
                 </div>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg">
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm opacity-90 mb-1">Buku Terjual</p>
                     <h3 class="text-3xl font-bold">{{ number_format($total_buku_terjual) }}</h3>
                 </div>
-                <div class=" bg-opacity-20 p-3 rounded-lg">
+                <div class="bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-book text-3xl"></i>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Buku Terlaris -->
+    <!-- Buku Terlaris dengan Cover -->
     @if($buku_terlaris->count() > 0)
     <div class="bg-white p-6 rounded-xl shadow-md border mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-fire text-indigo-600"></i> Top 5 Buku Terlaris</h2>
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+            <i class="fas fa-fire text-indigo-600"></i>
+            Top 5 Buku Terlaris Periode Ini
+        </h2>
+        <div class="space-y-3">
             @foreach($buku_terlaris as $index => $item)
-            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
-                <div class="flex items-start gap-3">
-                    <div class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                        {{ $index + 1 }}
+            <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100 hover:shadow-md transition">
+                <!-- Badge Ranking -->
+                <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow">
+                    {{ $index + 1 }}
+                </div>
+                
+                <!-- Cover Buku -->
+                <div class="flex-shrink-0">
+                    @if($item->buku && $item->buku->cover_buku)
+                    <img src="{{ asset('storage/' . $item->buku->cover_buku) }}" 
+                         alt="{{ $item->buku->judul_buku }}"
+                         class="w-12 h-16 object-cover rounded shadow-md border-2 border-white">
+                    @else
+                    <div class="w-12 h-16 bg-gray-200 rounded shadow-md border-2 border-white flex items-center justify-center">
+                        <i class="fas fa-book text-gray-400"></i>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-gray-800 text-sm truncate" title="{{ $item->buku->judul_buku ?? '-' }}">
-                            {{ $item->buku->judul_buku ?? '-' }}
-                        </p>
-                        <p class="text-xs text-gray-600 mt-1">Terjual: <span class="font-bold text-indigo-600">{{ $item->total_terjual }}</span> buku</p>
-                    </div>
+                    @endif
+                </div>
+                
+                <!-- Info Buku -->
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-gray-800 truncate" title="{{ $item->buku->judul_buku ?? '-' }}">
+                        {{ $item->buku->judul_buku ?? '-' }}
+                    </p>
+                    <p class="text-xs text-gray-600 mt-1">
+                        <span class="inline-flex items-center">
+                            <i class="fas fa-boxes text-indigo-500 mr-1"></i>
+                            Stok: <span class="font-semibold ml-1">{{ $item->buku->stokHarga->stok ?? 0 }}</span>
+                        </span>
+                        <span class="mx-2">|</span>
+                        <span class="inline-flex items-center">
+                            <i class="fas fa-tag text-green-500 mr-1"></i>
+                            Rp {{ number_format($item->buku->stokHarga->harga ?? 0, 0, ',', '.') }}
+                        </span>
+                    </p>
+                </div>
+                
+                <!-- Jumlah Terjual -->
+                <div class="flex-shrink-0 text-right">
+                    <p class="text-2xl font-bold text-indigo-600">{{ $item->total_terjual }}</p>
+                    <p class="text-xs text-gray-500">Terjual</p>
                 </div>
             </div>
             @endforeach

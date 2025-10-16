@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Buku;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
@@ -17,7 +18,7 @@ class TransaksiController extends Controller
     {
         $cart = session()->get('cart', []);
 
-        // ✅ Update stok dari database untuk memastikan data terkini
+        // Update stok dari database untuk memastikan data terkini
         foreach ($cart as $buku_id => $item) {
             $stokHarga = \App\Models\StokHarga::where('buku_id', $buku_id)->first();
             if ($stokHarga) {
@@ -36,13 +37,19 @@ class TransaksiController extends Controller
     }
 
     /**
-     * Tambah buku ke keranjang
+     * Tambah buku ke keranjang (DENGAN AJAX SUPPORT)
      */
-    public function addToCart(Buku $buku)
+    public function addToCart(Request $request, Buku $buku)
     {
         $stokHarga = $buku->stokHarga;
 
         if (!$stokHarga || $stokHarga->stok <= 0 || $stokHarga->harga <= 0) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Buku ini tidak tersedia untuk dijual.'
+                ], 400);
+            }
             return back()->with('error', 'Buku ini tidak tersedia untuk dijual.');
         }
 
@@ -51,6 +58,12 @@ class TransaksiController extends Controller
         if (isset($cart[$buku->id])) {
             // Cek stok sebelum nambah qty
             if ($cart[$buku->id]['qty'] + 1 > $stokHarga->stok) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Stok tidak mencukupi untuk buku ini.'
+                    ], 400);
+                }
                 return back()->with('error', 'Stok tidak mencukupi untuk buku ini.');
             }
             $cart[$buku->id]['qty']++;
@@ -59,107 +72,258 @@ class TransaksiController extends Controller
                 'judul_buku' => $buku->judul_buku,
                 'harga'      => $stokHarga->harga,
                 'qty'        => 1,
-                'stok'       => $stokHarga->stok, // ← TAMBAHKAN INI
+                'stok'       => $stokHarga->stok,
                 'cover_buku' => $buku->cover_buku ?? null,
             ];
         }
 
         session()->put('cart', $cart);
 
-        return back()->with('success', 'Buku berhasil ditambahkan ke keranjang.'); // ← Perbaiki juga ini
+        // Return JSON jika AJAX request
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Buku berhasil ditambahkan ke keranjang.',
+                'cart' => $cart
+            ]);
+        }
+
+        return back()->with('success', 'Buku berhasil ditambahkan ke keranjang.');
     }
 
     /**
-     * Hapus item dari keranjang
+     * Update quantity (DENGAN AJAX SUPPORT)
+     * ⚠️ PERBAIKAN: Terima $id, bukan Buku $buku
      */
-    public function removeFromCart($buku_id)
+    public function updateQty(Request $request, $id)
     {
         $cart = session()->get('cart', []);
 
-        if (isset($cart[$buku_id])) {
-            unset($cart[$buku_id]);
+        if (isset($cart[$id])) {
+            $newQty = (int) $request->qty;
+
+            // Validasi stok
+            $buku = Buku::findOrFail($id);
+            $stokHarga = $buku->stokHarga;
+
+            if (!$stokHarga) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data stok tidak ditemukan.'
+                    ], 400);
+                }
+                return back()->with('error', 'Data stok tidak ditemukan.');
+            }
+
+            if ($newQty > $stokHarga->stok) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Stok tidak mencukupi. Stok tersedia: ' . $stokHarga->stok
+                    ], 400);
+                }
+                return back()->with('error', 'Stok tidak mencukupi.');
+            }
+
+            if ($newQty <= 0) {
+                // Kalau qty < 1 hapus item
+                unset($cart[$id]);
+            } else {
+                // Update qty normal
+                $cart[$id]['qty'] = $newQty;
+                $cart[$id]['stok'] = $stokHarga->stok;
+            }
+
             session()->put('cart', $cart);
+        }
+
+        // ⚠️ PENTING: Return JSON jika AJAX request
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Keranjang diperbarui.',
+                'cart' => $cart
+            ]);
+        }
+
+        return back();
+    }
+
+    /**
+     * Hapus item dari keranjang (DENGAN AJAX SUPPORT)
+     * ⚠️ PERBAIKAN: Terima $id, bukan Buku $buku
+     */
+    public function removeFromCart(Request $request, $id)
+    {
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$id])) {
+            unset($cart[$id]);
+            session()->put('cart', $cart);
+        }
+
+        // Return JSON jika AJAX request
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Buku berhasil dihapus dari keranjang.',
+                'cart' => $cart
+            ]);
         }
 
         return back()->with('success', 'Buku berhasil dihapus dari keranjang.');
     }
 
     /**
+     * Clear cart (DENGAN AJAX SUPPORT)
+     */
+    public function clear(Request $request)
+    {
+        session()->forget('cart');
+
+        // Return JSON jika AJAX request
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Keranjang berhasil dikosongkan!'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan!');
+    }
+
+    /**
      * Proses checkout → simpan transaksi ke DB
+     * ⚠️ PERBAIKAN: Tambah support AJAX + return transaksi_id
      */
     public function checkout(Request $request)
     {
         $cart = session()->get('cart', []);
 
         if (empty($cart)) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Keranjang masih kosong!'
+                ], 400);
+            }
             return back()->with('error', 'Keranjang masih kosong!');
         }
 
-        // 🔎 Validasi stok & harga sebelum transaksi dibuat
+        // Validasi stok & harga sebelum transaksi dibuat
         foreach ($cart as $buku_id => $item) {
             $stokHarga = \App\Models\StokHarga::where('buku_id', $buku_id)->first();
 
             if (!$stokHarga) {
-                return back()->with('error', 'Data stok untuk buku tidak ditemukan.');
+                $message = 'Data stok untuk buku tidak ditemukan.';
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $message], 400);
+                }
+                return back()->with('error', $message);
             }
 
             if ($stokHarga->stok < $item['qty']) {
-                return back()->with('error', 'Stok ' . $stokHarga->buku->judul_buku . ' tidak mencukupi.');
+                $message = 'Stok ' . $stokHarga->buku->judul_buku . ' tidak mencukupi.';
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $message], 400);
+                }
+                return back()->with('error', $message);
             }
 
             if ($stokHarga->harga <= 0) {
-                return back()->with('error', 'Buku ' . $stokHarga->buku->judul_buku . ' belum memiliki harga.');
+                $message = 'Buku ' . $stokHarga->buku->judul_buku . ' belum memiliki harga.';
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $message], 400);
+                }
+                return back()->with('error', $message);
             }
         }
 
-        // ✅ Hitung total setelah validasi
+        // Hitung total setelah validasi
         $total = collect($cart)->sum(fn($item) => $item['harga'] * $item['qty']);
+        
         // Bersihkan input dari karakter non-digit
         $diskon = preg_replace('/[^0-9]/', '', $request->input('diskon', 0));
         $diskon = (float) $diskon;
         $dibayar = preg_replace('/[^0-9]/', '', $request->input('dibayar', 0));
         $dibayar = (float) $dibayar;
+        
         $subtotal = $total - $diskon;
         $kembalian = $dibayar - $subtotal;
-        $kembalian = $dibayar - $subtotal;
 
-        if ($dibayar < $subtotal) {
-            return back()->with('error', 'Uang dibayar kurang dari subtotal.');
+        // Validasi pembayaran untuk cash
+        $metodeBayar = $request->input('metode_bayar', 'cash');
+        if ($metodeBayar === 'cash' && $dibayar < $subtotal) {
+            $message = 'Uang dibayar kurang dari subtotal.';
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => $message], 400);
+            }
+            return back()->with('error', $message);
         }
 
-        // ✅ Simpan transaksi
-        $transaksi = Transaksi::create([
-            'kasir_id'    => auth()->id(),
-            'total_harga' => $total,
-            'diskon'      => $diskon,
-            'subtotal'    => $subtotal,
-            'dibayar'     => $dibayar,
-            'kembalian'   => $kembalian,
-            'metode_bayar' => $request->input('metode_bayar', 'cash'),
-        ]);
-
-        // ✅ Simpan detail + kurangi stok
-        foreach ($cart as $buku_id => $item) {
-            $stokHarga = \App\Models\StokHarga::where('buku_id', $buku_id)->first();
-
-            TransaksiItem::create([
-                'transaksi_id' => $transaksi->id,
-                'buku_id'      => $buku_id,
-                'qty'          => $item['qty'],
-                'harga_satuan' => $stokHarga->harga, // ambil dari DB biar aman
-                'subtotal'     => $stokHarga->harga * $item['qty'],
+        // Mulai transaksi database
+        DB::beginTransaction();
+        try {
+            // Simpan transaksi
+            $transaksi = Transaksi::create([
+                'kasir_id'     => auth()->id(),
+                'total_harga'  => $total,
+                'diskon'       => $diskon,
+                'subtotal'     => $subtotal,
+                'dibayar'      => $dibayar,
+                'kembalian'    => $kembalian,
+                'metode_bayar' => $metodeBayar,
             ]);
 
-            // Kurangi stok
-            $stokHarga->stok -= $item['qty'];
-            $stokHarga->save();
+            // Simpan detail + kurangi stok
+            foreach ($cart as $buku_id => $item) {
+                $stokHarga = \App\Models\StokHarga::where('buku_id', $buku_id)->first();
+
+                TransaksiItem::create([
+                    'transaksi_id' => $transaksi->id,
+                    'buku_id'      => $buku_id,
+                    'qty'          => $item['qty'],
+                    'harga_satuan' => $stokHarga->harga,
+                    'subtotal'     => $stokHarga->harga * $item['qty'],
+                ]);
+
+                // Kurangi stok
+                $stokHarga->stok -= $item['qty'];
+                $stokHarga->save();
+            }
+
+            DB::commit();
+
+            // Kosongkan keranjang
+            session()->forget('cart');
+
+            // ⚠️ PENTING: Return JSON untuk AJAX dengan transaksi_id
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'transaksi_id' => $transaksi->id,
+                    'message' => 'Transaksi berhasil disimpan.'
+                ]);
+            }
+
+            return redirect()->route('kasir.transaksi.struk', $transaksi->id)
+                ->with('success', 'Transaksi berhasil disimpan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            $message = 'Gagal memproses transaksi: ' . $e->getMessage();
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $message
+                ], 500);
+            }
+
+            return back()->with('error', $message);
         }
-
-        // ✅ Kosongkan keranjang
-        session()->forget('cart');
-
-        return redirect()->route('kasir.transaksi.struk', $transaksi->id)
-            ->with('success', 'Transaksi berhasil disimpan.');
     }
 
     /**
@@ -170,33 +334,10 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::with('items.buku')->findOrFail($id);
         return view('kasir.transaksi.struk', compact('transaksi'));
     }
-    public function updateQty(Request $request, Buku $buku)
-    {
-        $cart = session()->get('cart', []);
 
-        if (isset($cart[$buku->id])) {
-            $newQty = (int) $request->qty;
-
-            // ✅ Validasi stok
-            $stokHarga = $buku->stokHarga;
-            if ($newQty > $stokHarga->stok) {
-                return back()->with('error', 'Stok tidak mencukupi.');
-            }
-
-            if ($newQty <= 0) {
-                // Kalau qty < 1 hapus item
-                unset($cart[$buku->id]);
-            } else {
-                // Update qty normal
-                $cart[$buku->id]['qty'] = $newQty;
-                $cart[$buku->id]['stok'] = $stokHarga->stok; // ← Update stok juga
-            }
-
-            session()->put('cart', $cart);
-        }
-
-        return back();
-    }
+    /**
+     * Riwayat transaksi kasir
+     */
     public function riwayat()
     {
         $transaksis = Transaksi::with(['kasir', 'items.buku'])
@@ -205,6 +346,10 @@ class TransaksiController extends Controller
 
         return view('kasir.riwayat_transaksi.index', compact('transaksis'));
     }
+
+    /**
+     * Riwayat transaksi admin
+     */
     public function riwayatAdmin()
     {
         $transaksis = Transaksi::with(['kasir', 'items.buku'])
@@ -212,10 +357,5 @@ class TransaksiController extends Controller
             ->paginate(10);
 
         return view('admin.riwayat_transaksi.index', compact('transaksis'));
-    }
-    public function clear()
-    {
-        session()->forget('cart');
-        return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan!');
     }
 }

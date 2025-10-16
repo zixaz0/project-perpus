@@ -1,15 +1,5 @@
 @extends('layouts.app')
 
-@section('breadcrumb')
-    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
-        <ol class="flex items-center space-x-2">
-            <li>
-                <span class="text-indigo-600 font-medium">Dashboard</span>
-            </li>
-        </ol>
-    </nav>
-@endsection
-
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
     <!-- Header -->
@@ -20,6 +10,7 @@
         </h1>
         <p class="text-gray-600 mt-2">Selamat datang, {{ Auth::user()->name }}! Berikut ringkasan aktivitas kasir hari ini.</p>
     </div>
+    
 
     <!-- Statistik Cards Utama -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -45,7 +36,7 @@
                     <h3 class="text-3xl font-bold mb-1">Rp {{ number_format($pendapatanHariIni ?? 0, 0, ',', '.') }}</h3>
                     <p class="text-xs opacity-75">Total Pemasukan</p>
                 </div>
-                <div class=" bg-opacity-20 p-4 rounded-lg">
+                <div class="bg-opacity-20 p-4 rounded-lg">
                     <i class="fas fa-wallet text-3xl"></i>
                 </div>
             </div>
@@ -191,7 +182,7 @@
 
     <!-- Buku Terlaris & Transaksi Terbaru -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <!-- Buku Terlaris -->
+        <!-- Buku Terlaris dengan Cover -->
         <div class="bg-white rounded-xl shadow-md border p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <i class="fas fa-fire text-red-500"></i>
@@ -205,12 +196,30 @@
                         {{ $index + 1 }}
                     </div>
                     
+                    <!-- Cover Buku -->
+                    <div class="flex-shrink-0">
+                        @if(isset($buku->cover_buku))
+                        <img src="{{ asset('storage/' . $buku->cover_buku) }}" 
+                             alt="{{ $buku->judul }}"
+                             class="w-12 h-16 object-cover rounded shadow-md border-2 border-white">
+                        @else
+                        <div class="w-12 h-16 bg-gray-200 rounded shadow-md border-2 border-white flex items-center justify-center">
+                            <i class="fas fa-book text-gray-400"></i>
+                        </div>
+                        @endif
+                    </div>
+                    
                     <!-- Info Buku -->
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold text-gray-800 truncate" title="{{ $buku->judul }}">
                             {{ $buku->judul }}
                         </p>
-                        <p class="text-xs text-gray-600 mt-1">{{ $buku->penulis ?? 'Penulis' }}</p>
+                        <p class="text-xs text-gray-600 mt-1">
+                            <span class="inline-flex items-center">
+                                <i class="fas fa-user text-indigo-500 mr-1"></i>
+                                {{ $buku->penulis ?? 'Penulis' }}
+                            </span>
+                        </p>
                     </div>
                     
                     <!-- Jumlah Terjual -->
