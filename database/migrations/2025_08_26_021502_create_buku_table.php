@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('judul_buku');
             $table->string('penerbit');
             $table->string('pengarang');
-            $table->date('tahun_terbit');
+            $table->string('tahun_terbit');
             $table->bigInteger('kategori_id');
             $table->string('cover_buku')->nullable();
             $table->timestamps();

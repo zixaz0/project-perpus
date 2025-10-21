@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'BukuKita')</title>
+    <title>@yield('title', 'BukuKita - Aplikasi Toko Buku')</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
@@ -21,6 +21,9 @@
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <style>
         [x-cloak] {
@@ -358,40 +361,72 @@ window.addEventListener('resize', () => {
         @endif
     </script>
 
-    <script>
+<script>
         function showProfile() {
             Swal.fire({
                 title: 'Profil Saya',
                 html: `
-        <div class="flex flex-col items-center space-y-4">
-            <div class="relative group w-24 h-24">
+        <div class="flex flex-col items-center space-y-6">
+            <!-- Foto Profil Full Size -->
+            <div class="relative group w-48 h-48">
                 <img id="profileImage"
                     src="{{ Auth::user()->foto
                         ? asset('storage/' . Auth::user()->foto)
-                        : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random&size=100' }}"
-                    alt="avatar" class="w-24 h-24 rounded-full shadow-md object-cover">
+                        : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&background=random&size=200' }}"
+                    alt="avatar" class="w-48 h-48 rounded-2xl shadow-xl object-cover border-4 border-indigo-100 cursor-pointer transition-transform hover:scale-105"
+                    onclick="viewFullImage(this.src)">
                 <button type="button"
                     onclick="document.getElementById('inputFoto').click()"
-                    class="cursor-pointer absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow opacity-0 group-hover:opacity-100 transition">
-                    <i class="fas fa-pencil-alt text-xs"></i>
+                    class="cursor-pointer absolute bottom-2 right-2 bg-indigo-600 text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-700 hover:scale-110">
+                    <i class="fas fa-camera text-sm"></i>
                 </button>
+                <div class="absolute top-2 right-2 bg-white text-indigo-600 px-2 py-1 rounded-full text-xs font-semibold shadow">
+                    {{ ucfirst(Auth::user()->role) }}
+                </div>
             </div>
+            
+            <!-- Form Upload -->
             <form id="form-update-photo" action="{{ route('profile.updatePhoto') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="file" id="inputFoto" name="foto" accept="image/*" class="hidden"
                     onchange="previewImage(this)">
             </form>
-            <div class="text-left space-y-2 w-full">
-                <p><strong>Nama:</strong> {{ Auth::user()->name }}</p>
-                <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
-                <p><strong>Role:</strong> {{ ucfirst(Auth::user()->role) }}</p>
+            
+            <!-- Info Profil -->
+            <div class="w-full bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-6 space-y-3">
+                <div class="flex items-center gap-3 pb-3 border-b border-indigo-200">
+                    <i class="fas fa-user text-indigo-600"></i>
+                    <div class="text-left flex-1">
+                        <p class="text-xs text-gray-500">Nama Lengkap</p>
+                        <p class="font-semibold text-gray-800">{{ Auth::user()->name }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 pb-3 border-b border-indigo-200">
+                    <i class="fas fa-envelope text-indigo-600"></i>
+                    <div class="text-left flex-1">
+                        <p class="text-xs text-gray-500">Email</p>
+                        <p class="font-semibold text-gray-800">{{ Auth::user()->email }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-id-badge text-indigo-600"></i>
+                    <div class="text-left flex-1">
+                        <p class="text-xs text-gray-500">Role</p>
+                        <p class="font-semibold text-gray-800">{{ ucfirst(Auth::user()->role) }}</p>
+                    </div>
+                </div>
             </div>
+            
+            <p class="text-xs text-gray-500 italic">
+                <i class="fas fa-info-circle mr-1"></i>
+                Klik foto untuk melihat ukuran penuh
+            </p>
         </div>
     `,
                 showConfirmButton: false,
-                width: 400,
+                width: 500,
                 customClass: {
-                    popup: 'rounded-2xl shadow-lg'
+                    popup: 'rounded-3xl shadow-2xl'
                 },
                 didOpen: () => {
                     const content = Swal.getHtmlContainer();
@@ -399,12 +434,12 @@ window.addEventListener('resize', () => {
                     btnWrapper.className = "flex justify-between gap-3 mt-6 w-full";
                     btnWrapper.innerHTML = `
             <button type="button" id="btnKembali"
-                class="cursor-pointer flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                Kembali
+                class="cursor-pointer flex-1 px-5 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-medium transition-all hover:shadow-md">
+                <i class="fas fa-arrow-left mr-2"></i>Kembali
             </button>
             <button type="button" id="btnSimpan"
-                class="cursor-pointer flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 hidden">
-                Simpan Perubahan
+                class="cursor-pointer flex-1 px-5 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-medium transition-all hover:shadow-md hidden">
+                <i class="fas fa-save mr-2"></i>Simpan Perubahan
             </button>
         `;
                     content.appendChild(btnWrapper);
@@ -414,6 +449,21 @@ window.addEventListener('resize', () => {
                     });
                 }
             })
+        }
+
+        function viewFullImage(src) {
+            Swal.fire({
+                imageUrl: src,
+                imageAlt: 'Foto Profil',
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: 'rgba(0, 0, 0, 0.95)',
+                backdrop: 'rgba(0, 0, 0, 0.8)',
+                customClass: {
+                    image: 'max-h-screen object-contain rounded-2xl',
+                    closeButton: 'text-white hover:text-gray-300'
+                }
+            });
         }
 
         function previewImage(input) {

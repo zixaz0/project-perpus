@@ -75,7 +75,8 @@
 
                 <!-- Preview Kode -->
                 <div id="kode-preview" class="hidden bg-indigo-50 border border-indigo-200 rounded-lg p-4">
-                    <p class="text-sm text-gray-600 mb-1">📋 Kode Buku yang Akan Digunakan:</p>
+                    <p class="text-sm text-gray-600 mb-1">
+                        <i class="fa fa-clipboard-list text-indigo-600"></i> Buku yang Akan Digunakan:</p>
                     <p class="text-2xl font-bold text-indigo-600" id="preview-kode">-</p>
                 </div>
 
@@ -114,7 +115,7 @@
                     <label for="tahun_terbit" class="block text-sm font-medium text-gray-700 mb-2">
                         Tahun Terbit <span class="text-red-500">*</span>
                     </label>
-                    <input type="date" id="tahun_terbit" name="tahun_terbit" required
+                    <input type="month" id="tahun_terbit" name="tahun_terbit" required
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
 

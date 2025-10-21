@@ -275,7 +275,7 @@
                 const data = await response.json();
 
                 if (data.success && data.transaksi_id) {
-                    // ✅ LANGSUNG REDIRECT KE STRUK TANPA SWAL
+                    // LANGSUNG REDIRECT KE STRUK TANPA SWAL
                     window.location.href = `/kasir/transaksi/struk/${data.transaksi_id}`;
                 } else {
                     Swal.fire({

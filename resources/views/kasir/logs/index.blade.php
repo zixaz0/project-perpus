@@ -7,7 +7,7 @@
                 <a href="{{ route('kasir.dashboard') }}" class="text-indigo-600 hover:underline">Dashboard</a>
             </li>
             <li class="mx-2 text-gray-400">/</li>
-            <li class="text-gray-700">Log Aktivitas</li>
+            <a class="text-indigo-600 hover:underline cursor-pointer">Log Aktivitas</a>
         </ol>
     </nav>
 @endsection

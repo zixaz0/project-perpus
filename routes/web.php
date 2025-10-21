@@ -96,25 +96,31 @@ Route::middleware(['auth', RoleMiddleware::class . ':owner'])->group(function ()
     });
 });
 
+// ===================================================
+// =============== KASIR ROUTES =======================
+// ===================================================
 Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
     ->prefix('kasir')
     ->name('kasir.')
     ->group(function () {
-        // Dashboard (sudah ada)
+        // Dashboard
         Route::get('/', [KasirController::class, 'index'])->name('dashboard');
 
-        // Midtrans Routes (sudah ada, tetap pakai)
+        // Midtrans Routes
         Route::post('/midtrans/token', [KasirMidtransController::class, 'getToken'])->name('midtrans.token');
         Route::post('/midtrans/cancel', [KasirMidtransController::class, 'cancelPayment'])->name('midtrans.cancel');
         Route::post('/midtrans/deny', [KasirMidtransController::class, 'denyPayment'])->name('midtrans.deny');
 
-        // Data Buku (sudah ada)
+        // Data Buku
         Route::get('/buku', [BukuController::class, 'indexkasir'])->name('buku.index');
 
-        // Riwayat Transaksi (sudah ada)
+        // Riwayat Transaksi
         Route::get('/riwayat-transaksi', [TransaksiController::class, 'riwayat'])->name('riwayat_transaksi.index');
+        
+        // ✅ FIXED: Route refund dipindah keluar dari prefix transaksi
+        Route::post('/refund/{id}', [TransaksiController::class, 'refund'])->name('refund');
 
-        // Transaksi / Keranjang (sudah ada, tetap pakai yang ini)
+        // Transaksi / Keranjang
         Route::prefix('transaksi')
             ->name('transaksi.')
             ->group(function () {
@@ -127,7 +133,7 @@ Route::middleware(['auth', RoleMiddleware::class . ':kasir'])
                 Route::delete('clear', [TransaksiController::class, 'clear'])->name('clear');
             });
 
-        // Activity Log (sudah ada)
+        // Activity Log
         Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
         Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('logs.show');
     });

@@ -51,8 +51,9 @@
                 <div>
                     <p class="text-sm opacity-90 mb-1">Total Transaksi</p>
                     <h3 class="text-3xl font-bold">{{ number_format($total_transaksi) }}</h3>
+                    <p class="text-xs opacity-75 mt-1">Berhasil</p>
                 </div>
-                <div class="bg-opacity-20 p-3 rounded-lg">
+                <div class=" bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-receipt text-3xl"></i>
                 </div>
             </div>
@@ -62,9 +63,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm opacity-90 mb-1">Total Pendapatan</p>
-                    <h3 class="text-3xl font-bold">Rp {{ number_format($total_pendapatan, 0, ',', '.') }}</h3>
+                    <h3 class="text-2xl font-bold">Rp {{ number_format($total_pendapatan, 0, ',', '.') }}</h3>
+                    <p class="text-xs opacity-75 mt-1">Setelah refund</p>
                 </div>
-                <div class="bg-opacity-20 p-3 rounded-lg">
+                <div class=" bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-money-bill-wave text-3xl"></i>
                 </div>
             </div>
@@ -74,7 +76,8 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm opacity-90 mb-1">Total Diskon</p>
-                    <h3 class="text-3xl font-bold">Rp {{ number_format($total_diskon, 0, ',', '.') }}</h3>
+                    <h3 class="text-2xl font-bold">Rp {{ number_format($total_diskon, 0, ',', '.') }}</h3>
+                    <p class="text-xs opacity-75 mt-1">Diberikan</p>
                 </div>
                 <div class="bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-tag text-3xl"></i>
@@ -87,13 +90,45 @@
                 <div>
                     <p class="text-sm opacity-90 mb-1">Buku Terjual</p>
                     <h3 class="text-3xl font-bold">{{ number_format($total_buku_terjual) }}</h3>
+                    <p class="text-xs opacity-75 mt-1">Unit</p>
                 </div>
-                <div class="bg-opacity-20 p-3 rounded-lg">
+                <div class=" bg-opacity-20 p-3 rounded-lg">
                     <i class="fas fa-book text-3xl"></i>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Card Tambahan: Transaksi Refund -->
+    @if($total_refund > 0)
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-red-500 to-red-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90 mb-1">Transaksi Di-Refund</p>
+                    <h3 class="text-3xl font-bold">{{ number_format($total_refund) }}</h3>
+                    <p class="text-xs opacity-75 mt-1">Transaksi</p>
+                </div>
+                <div class=" bg-opacity-20 p-3 rounded-lg">
+                    <i class="fas fa-undo text-3xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-pink-500 to-pink-600 text-white p-6 rounded-xl shadow-lg">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm opacity-90 mb-1">Nilai Refund</p>
+                    <h3 class="text-2xl font-bold">Rp {{ number_format($total_nilai_refund, 0, ',', '.') }}</h3>
+                    <p class="text-xs opacity-75 mt-1">Total dikembalikan</p>
+                </div>
+                <div class=" bg-opacity-20 p-3 rounded-lg">
+                    <i class="fas fa-hand-holding-usd text-3xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Buku Terlaris dengan Cover -->
     @if($buku_terlaris->count() > 0)
@@ -174,12 +209,13 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diskon</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach($transaksis as $transaksi)
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 {{ $transaksi->status === 'refund' ? 'bg-red-50 opacity-75' : '' }}">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $loop->iteration + ($transaksis->currentPage() - 1) * $transaksis->perPage() }}
                         </td>
@@ -189,13 +225,13 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $transaksi->kasir->name ?? '-' }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold {{ $transaksi->status === 'refund' ? 'text-gray-400 line-through' : 'text-gray-900' }}">
                             Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm {{ $transaksi->status === 'refund' ? 'text-gray-400 line-through' : 'text-red-600' }}">
                             Rp {{ number_format($transaksi->diskon, 0, ',', '.') }}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold {{ $transaksi->status === 'refund' ? 'text-gray-400 line-through' : 'text-green-600' }}">
                             Rp {{ number_format($transaksi->subtotal, 0, ',', '.') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -203,6 +239,17 @@
                                 {{ $transaksi->metode_bayar == 'cash' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
                                 {{ strtoupper($transaksi->metode_bayar) }}
                             </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($transaksi->status === 'refund')
+                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-red-100 text-red-700 flex items-center justify-center gap-1 w-fit">
+                                    <i class="fas fa-undo"></i> REFUND
+                                </span>
+                            @else
+                                <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700 flex items-center justify-center gap-1 w-fit">
+                                    <i class="fas fa-check-circle"></i> SELESAI
+                                </span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <a href="{{ route('owner.laporan.detail', $transaksi->id) }}" 
@@ -215,12 +262,33 @@
                 </tbody>
                 <tfoot class="bg-gray-100">
                     <tr class="font-bold">
-                        <td colspan="3" class="px-6 py-4 text-right">GRAND TOTAL:</td>
-                        <td class="px-6 py-4 text-sm">Rp {{ number_format($transaksis->sum('total_harga'), 0, ',', '.') }}</td>
-                        <td class="px-6 py-4 text-sm text-red-600">Rp {{ number_format($transaksis->sum('diskon'), 0, ',', '.') }}</td>
-                        <td class="px-6 py-4 text-sm text-green-600">Rp {{ number_format($transaksis->sum('subtotal'), 0, ',', '.') }}</td>
-                        <td colspan="2"></td>
+                        <td colspan="3" class="px-6 py-4 text-right">GRAND TOTAL (Berhasil):</td>
+                        <td class="px-6 py-4 text-sm">
+                            Rp {{ number_format($transaksis->where('status', '!=', 'refund')->sum('total_harga'), 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-red-600">
+                            Rp {{ number_format($transaksis->where('status', '!=', 'refund')->sum('diskon'), 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-green-600">
+                            Rp {{ number_format($transaksis->where('status', '!=', 'refund')->sum('subtotal'), 0, ',', '.') }}
+                        </td>
+                        <td colspan="3"></td>
                     </tr>
+                    @if($transaksis->where('status', 'refund')->count() > 0)
+                    <tr class="font-bold text-red-600">
+                        <td colspan="3" class="px-6 py-4 text-right">TOTAL REFUND:</td>
+                        <td class="px-6 py-4 text-sm">
+                            Rp {{ number_format($transaksis->where('status', 'refund')->sum('total_harga'), 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            Rp {{ number_format($transaksis->where('status', 'refund')->sum('diskon'), 0, ',', '.') }}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            Rp {{ number_format($transaksis->where('status', 'refund')->sum('subtotal'), 0, ',', '.') }}
+                        </td>
+                        <td colspan="3"></td>
+                    </tr>
+                    @endif
                 </tfoot>
             </table>
         </div>

@@ -12,9 +12,26 @@ class StokHargaController extends Controller
     /**
      * Tampilkan semua data stok & harga
      */
-    public function index()
+public function index(Request $request)
     {
-        $stokHarga = StokHarga::with('buku')->paginate(10);
+        $query = StokHarga::with('buku');
+
+        // Fitur Pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            
+            $query->whereHas('buku', function($q) use ($search) {
+                $q->where('judul_buku', 'like', "%{$search}%")
+                  ->orWhere('kode_buku', 'like', "%{$search}%");
+            });
+        }
+
+        // Urutkan berdasarkan terbaru dan paginate
+        $stokHarga = $query->latest()->paginate(10);
+
+        // Append query string untuk pagination agar search tetap aktif
+        $stokHarga->appends($request->all());
+
         return view('admin.stok_harga.index', compact('stokHarga'));
     }
 

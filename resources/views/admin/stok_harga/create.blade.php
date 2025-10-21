@@ -92,7 +92,8 @@
 
             <!-- Preview Summary -->
             <div id="summary-preview" class="hidden bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg p-4">
-                <p class="text-sm font-semibold text-gray-700 mb-3">📋 Ringkasan Data:</p>
+                <p class="text-sm font-semibold text-gray-700 mb-3">
+                    <i class="fa fa-clipboard-list text-indigo-600"></i> Ringkasan Data:</p>
                 <div class="space-y-2">
                     <div class="flex justify-between">
                         <span class="text-gray-600">Stok:</span>

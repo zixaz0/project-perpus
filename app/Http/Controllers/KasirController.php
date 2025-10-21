@@ -17,16 +17,29 @@ class KasirController extends Controller
         // Tanggal hari ini
         $today = Carbon::today();
         
-        // 1. Transaksi Hari Ini
-        $transaksiHariIni = Transaksi::whereDate('created_at', $today)->count();
+        // 1. Transaksi Hari Ini (TIDAK TERMASUK REFUND)
+        $transaksiHariIni = Transaksi::whereDate('created_at', $today)
+            ->where(function($query) {
+                $query->where('status', 'selesai')
+                      ->orWhereNull('status');
+            })
+            ->count();
         
-        // 2. Pendapatan Hari Ini
+        // 2. Pendapatan Hari Ini (TIDAK TERMASUK REFUND)
         $pendapatanHariIni = Transaksi::whereDate('created_at', $today)
+            ->where(function($query) {
+                $query->where('status', 'selesai')
+                      ->orWhereNull('status');
+            })
             ->sum('subtotal');
         
-        // 3. Buku Terjual Hari Ini
+        // 3. Buku Terjual Hari Ini (TIDAK TERMASUK REFUND)
         $bukuTerjual = TransaksiItem::whereHas('transaksi', function($query) use ($today) {
-            $query->whereDate('created_at', $today);
+            $query->whereDate('created_at', $today)
+                  ->where(function($q) {
+                      $q->where('status', 'selesai')
+                        ->orWhereNull('status');
+                  });
         })->sum('qty');
         
         // 4. Total Buku (dari stok)
@@ -61,13 +74,17 @@ class KasirController extends Controller
                 ];
             });
         
-        // 7. Buku Terlaris Minggu Ini (DENGAN COVER BUKU)
+        // 7. Buku Terlaris Minggu Ini (TIDAK TERMASUK REFUND)
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
         
         $bukuTerlaris = TransaksiItem::select('buku_id', DB::raw('SUM(qty) as total_terjual'))
             ->whereHas('transaksi', function($query) use ($startOfWeek, $endOfWeek) {
-                $query->whereBetween('created_at', [$startOfWeek, $endOfWeek]);
+                $query->whereBetween('created_at', [$startOfWeek, $endOfWeek])
+                      ->where(function($q) {
+                          $q->where('status', 'selesai')
+                            ->orWhereNull('status');
+                      });
             })
             ->groupBy('buku_id')
             ->orderBy('total_terjual', 'desc')
@@ -83,8 +100,12 @@ class KasirController extends Controller
                 ];
             });
         
-        // 8. Transaksi Terbaru (5 transaksi terakhir hari ini)
+        // 8. Transaksi Terbaru (5 transaksi terakhir hari ini) - TIDAK TERMASUK REFUND
         $transaksiTerbaru = Transaksi::whereDate('created_at', $today)
+            ->where(function($query) {
+                $query->where('status', 'selesai')
+                      ->orWhereNull('status');
+            })
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
@@ -96,11 +117,16 @@ class KasirController extends Controller
                 ];
             });
         
-        // 9. Data Grafik Penjualan Mingguan (7 hari terakhir)
+        // 9. Data Grafik Penjualan Mingguan (7 hari terakhir) - TIDAK TERMASUK REFUND
         $grafikData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
-            $count = Transaksi::whereDate('created_at', $date)->count();
+            $count = Transaksi::whereDate('created_at', $date)
+                ->where(function($query) {
+                    $query->where('status', 'selesai')
+                          ->orWhereNull('status');
+                })
+                ->count();
             $grafikData[] = $count;
         }
         
@@ -115,5 +141,94 @@ class KasirController extends Controller
             'transaksiTerbaru',
             'grafikData'
         ));
+    }
+    public function refund(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'admin_password' => 'required|string',
+        ]);
+
+        // Cari transaksi
+        $transaksi = Transaksi::with('items')->find($id);
+        
+        if (!$transaksi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi tidak ditemukan.',
+            ], 404);
+        }
+
+        // ✅ CEK BATAS WAKTU 24 JAM
+        $batasWaktu = Carbon::parse($transaksi->created_at)->addHours(24);
+        $sekarang = Carbon::now();
+
+        if ($sekarang->greaterThan($batasWaktu)) {
+            $waktuLewat = $sekarang->diffForHumans($batasWaktu, true);
+            return response()->json([
+                'success' => false,
+                'message' => 'Refund tidak dapat dilakukan. Batas waktu refund 24 jam telah terlewati (' . $waktuLewat . ' yang lalu).',
+            ], 400);
+        }
+
+        // Cek apakah transaksi sudah direfund
+        if ($transaksi->status === 'refund') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi ini sudah di-refund sebelumnya.',
+            ], 400);
+        }
+
+        // Verifikasi password admin - cari admin pertama yang ditemukan
+        $admin = User::where('role', 'admin')->first();
+
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Admin tidak ditemukan di sistem.',
+            ], 404);
+        }
+
+        if (!Hash::check($request->admin_password, $admin->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password admin salah!',
+            ], 401);
+        }
+
+        // Proses refund
+        DB::beginTransaction();
+        try {
+            // Kembalikan stok semua item
+            foreach ($transaksi->items as $item) {
+                $stokHarga = \App\Models\StokHarga::where('buku_id', $item->buku_id)->first();
+                if ($stokHarga) {
+                    $stokHarga->stok += $item->qty;
+                    $stokHarga->save();
+                }
+            }
+
+            // Update status transaksi
+            $transaksi->update([
+                'status' => 'refund',
+                'refund_at' => now(),
+                'refund_by' => $admin->id,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil di-refund. Stok telah dikembalikan.',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal melakukan refund: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

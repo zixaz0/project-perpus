@@ -1,15 +1,4 @@
 @extends('layouts.app')
-
-@section('breadcrumb')
-    <nav class="text-sm text-gray-600" aria-label="breadcrumb">
-        <ol class="flex items-center space-x-2">
-            <li>
-                <span class="text-indigo-600 font-medium">Dashboard</span>
-            </li>
-        </ol>
-    </nav>
-@endsection
-
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-8">
     <!-- Header -->
