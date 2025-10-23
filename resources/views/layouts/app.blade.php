@@ -269,12 +269,137 @@ window.addEventListener('resize', () => {
 
             <!-- User Info -->
             <div class="flex items-center gap-2 md:gap-4">
-                <!-- Notifikasi -->
-                <button class="relative text-gray-600 hover:text-indigo-600 cursor-pointer">
-                    <i class="fas fa-bell text-lg"></i>
-                    <span
-                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center">3</span>
-                </button>
+                <!-- Notifikasi Real-time -->
+                <div class="relative" x-data="{
+                    open: false,
+                    count: 0,
+                    notifications: [],
+                    loading: false,
+                    async loadNotifications() {
+                        this.loading = true;
+                        try {
+                            const response = await fetch('/notifications', {
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            if (response.ok) {
+                                const data = await response.json();
+                                this.count = data.count;
+                                this.notifications = data.notifications;
+                            } else {
+                                console.error('Error response:', response.status);
+                            }
+                        } catch (error) {
+                            console.error('Error loading notifications:', error);
+                        } finally {
+                            this.loading = false;
+                        }
+                    }
+                }" x-init="loadNotifications();
+                setInterval(() => loadNotifications(), 30000)">
+
+                    <!-- Bell Icon Button -->
+                    <button @click="open = !open"
+                        class="relative text-gray-600 hover:text-indigo-600 cursor-pointer transition-all">
+                        <i class="fas fa-bell text-lg"></i>
+                        <span x-show="count > 0" x-text="count" x-transition
+                            class="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[18px] h-[18px] rounded-full flex items-center justify-center font-semibold px-1 shadow-lg">
+                        </span>
+                    </button>
+
+                    <!-- Dropdown Panel -->
+                    <div x-show="open" x-cloak x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                        x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                        @click.away="open = false"
+                        class="absolute right-0 mt-3 w-80 md:w-96 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-[500px] overflow-hidden flex flex-col">
+
+                        <!-- Header -->
+                        <div class="px-5 py-4 border-b bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-bell text-lg"></i>
+                                    <h3 class="font-bold text-base">Notifikasi</h3>
+                                </div>
+                                <span x-show="count > 0" x-text="count + ' baru'"
+                                    class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div x-show="loading" class="p-8 text-center">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto">
+                            </div>
+                            <p class="text-sm text-gray-500 mt-3">Memuat notifikasi...</p>
+                        </div>
+
+                        <!-- Content -->
+                        <div x-show="!loading" class="overflow-y-auto flex-1 bg-gray-50">
+                            <!-- Empty State -->
+                            <template x-if="notifications.length === 0">
+                                <div class="p-10 text-center">
+                                    <div
+                                        class="inline-flex items-center justify-center w-16 h-16 bg-gray-200 rounded-full mb-3">
+                                        <i class="fas fa-bell-slash text-2xl text-gray-400"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-500 font-medium">Tidak ada notifikasi</p>
+                                    <p class="text-xs text-gray-400 mt-1">Anda sudah up to date!</p>
+                                </div>
+                            </template>
+
+                            <!-- Notification Items -->
+                            <template x-for="(notif, index) in notifications" :key="index">
+                                <a :href="notif.link" @click="open = false"
+                                    class="block px-5 py-4 hover:bg-white border-b border-gray-200 last:border-b-0 transition-all cursor-pointer group">
+                                    <div class="flex items-start gap-3">
+                                        <!-- Icon Badge -->
+                                        <div :class="{
+                                            'bg-red-100 text-red-600 ring-red-200': notif.type === 'danger',
+                                            'bg-yellow-100 text-yellow-600 ring-yellow-200': notif.type === 'warning',
+                                            'bg-blue-100 text-blue-600 ring-blue-200': notif.type === 'info',
+                                            'bg-green-100 text-green-600 ring-green-200': notif.type === 'success'
+                                        }"
+                                            class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ring-2 ring-offset-1 transition-transform group-hover:scale-110">
+                                            <i :class="'fas ' + notif.icon" class="text-base"></i>
+                                        </div>
+
+                                        <!-- Content -->
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-bold text-gray-800 mb-1 group-hover:text-indigo-600 transition-colors"
+                                                x-text="notif.title"></p>
+                                            <p class="text-xs text-gray-600 leading-relaxed mb-2"
+                                                x-text="notif.message"></p>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-clock text-[10px] text-gray-400"></i>
+                                                <p class="text-[10px] text-gray-400 font-medium" x-text="notif.time">
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Arrow -->
+                                        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <i class="fas fa-chevron-right text-xs text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="px-5 py-3 border-t bg-white">
+                            <button @click="loadNotifications()"
+                                class="w-full text-center text-xs text-indigo-600 hover:text-indigo-700 font-semibold py-2 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer">
+                                <i class="fas fa-sync-alt mr-1" :class="{ 'animate-spin': loading }"></i>
+                                <span x-text="loading ? 'Memuat...' : 'Refresh Notifikasi'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- User Dropdown -->
                 <div class="relative" x-data="{ open: false }">
@@ -361,7 +486,7 @@ window.addEventListener('resize', () => {
         @endif
     </script>
 
-<script>
+    <script>
         function showProfile() {
             Swal.fire({
                 title: 'Profil Saya',

@@ -16,7 +16,8 @@
     <div class="container mx-auto px-4 py-6">
         <!-- Header -->
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
-            <h1 class="text-2xl font-bold text-gray-800"> Log Aktivitas Kasir</h1>
+            <h1 class="text-2xl font-bold text-gray-800"> 
+                <i class="fas fa-clipboard-list text-indigo-600"></i> Log Aktivitas Kasir</h1>
 
             <form action="{{ route('kasir.logs.index') }}" method="GET" class="flex items-center gap-2">
                 <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari aksi / model..."

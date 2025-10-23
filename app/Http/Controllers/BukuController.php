@@ -74,25 +74,27 @@ class BukuController extends Controller
         }
 
         $buku = $query->latest()->paginate(10);
+
         return view('owner.buku.index', compact('buku', 'title', 'kategori'));
     }
 
     public function create()
     {
         $kategori = Kategori::all();
+
         return view('admin.buku.create', compact('kategori'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'judul_buku'   => 'required',
-            'penerbit'     => 'required',
-            'pengarang'    => 'required',
+            'judul_buku' => 'required',
+            'penerbit' => 'required',
+            'pengarang' => 'required',
             'tahun_terbit' => 'required|date',
-            'kategori_id'  => 'required|exists:kategori,id',
-            'cover_buku'   => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
-            'stok'  => 'nullable|integer|min:0',
+            'kategori_id' => 'required|exists:kategori,id',
+            'cover_buku' => 'nullable|image|mimes:jpg,png,jpeg|max:2048',
+            'stok' => 'nullable|integer|min:0',
             'harga' => 'nullable|numeric|min:0',
         ]);
 
@@ -100,13 +102,13 @@ class BukuController extends Controller
 
         // Prefix kategori & jenis
         $prefixKategori = strtoupper(substr($kategori->kategori, 0, 2));
-        $prefixJenis    = strtoupper(substr($kategori->jenis, 0, 2));
+        $prefixJenis = strtoupper(substr($kategori->jenis, 0, 2));
 
         // Cari buku terakhir
         $lastBook = Buku::where('kategori_id', $kategori->id)->orderBy('id', 'desc')->first();
         $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, -3) + 1) : 1;
 
-        $kode_buku = 'BK' . $prefixKategori . $prefixJenis . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        $kode_buku = 'BK'.$prefixKategori.$prefixJenis.str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         $data = $request->only(['judul_buku', 'penerbit', 'pengarang', 'kategori_id', 'tahun_terbit']);
         $data['kode_buku'] = $kode_buku;
@@ -120,17 +122,18 @@ class BukuController extends Controller
         // Simpan stok & harga
         StokHarga::create([
             'buku_id' => $buku->id,
-            'stok'    => $request->stok ?? 0,
-            'harga'   => $request->harga ?? 0,
+            'stok' => $request->stok ?? 0,
+            'harga' => $request->harga ?? 0,
         ]);
 
-        return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil ditambahkan dengan kode: ' . $kode_buku);
+        return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil ditambahkan dengan kode: '.$kode_buku);
     }
 
     public function edit($id)
     {
         $buku = Buku::with('stokHarga')->findOrFail($id);
         $kategori = Kategori::all();
+
         return view('admin.buku.edit', compact('buku', 'kategori'));
     }
 
@@ -138,26 +141,26 @@ class BukuController extends Controller
     {
         try {
             $request->validate([
-                'judul_buku'   => 'required|string|max:255',
-                'penerbit'     => 'required|string|max:255',
-                'pengarang'    => 'required|string|max:255',
-                'kategori_id'  => 'required|exists:kategori,id',
+                'judul_buku' => 'required|string|max:255',
+                'penerbit' => 'required|string|max:255',
+                'pengarang' => 'required|string|max:255',
+                'kategori_id' => 'required|exists:kategori,id',
                 'tahun_terbit' => 'required|date',
-                'cover_buku'   => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-                'stok'  => 'nullable|integer|min:0',
+                'cover_buku' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'stok' => 'nullable|integer|min:0',
                 'harga' => 'nullable|numeric|min:0',
             ],
-            [
-                'judul_buku.required' => 'Judul buku harus diisi.',
-                'penerbit.required' => 'Penerbit harus diisi.',
-                'pengarang.required' => 'Pengarang harus diisi.',
-                'kategori_id.required' => 'Kategori harus dipilih.',
-                'tahun_terbit.required' => 'Tahun terbit harus diisi.',
-                'stok.integer' => 'Stok harus berupa angka.',
-                'stok.min' => 'Stok minimal 0.',
-                'harga.numeric' => 'Harga harus berupa angka.',
-                'harga.min' => 'Harga minimal 0.',
-            ]);
+                [
+                    'judul_buku.required' => 'Judul buku harus diisi.',
+                    'penerbit.required' => 'Penerbit harus diisi.',
+                    'pengarang.required' => 'Pengarang harus diisi.',
+                    'kategori_id.required' => 'Kategori harus dipilih.',
+                    'tahun_terbit.required' => 'Tahun terbit harus diisi.',
+                    'stok.integer' => 'Stok harus berupa angka.',
+                    'stok.min' => 'Stok minimal 0.',
+                    'harga.numeric' => 'Harga harus berupa angka.',
+                    'harga.min' => 'Harga minimal 0.',
+                ]);
 
             $buku = Buku::findOrFail($id);
 
@@ -168,12 +171,12 @@ class BukuController extends Controller
                 $kategori = Kategori::findOrFail($request->kategori_id);
 
                 $prefixKategori = strtoupper(substr($kategori->kategori, 0, 2));
-                $prefixJenis    = strtoupper(substr($kategori->jenis, 0, 2));
+                $prefixJenis = strtoupper(substr($kategori->jenis, 0, 2));
 
                 $lastBook = Buku::where('kategori_id', $kategori->id)->orderBy('id', 'desc')->first();
                 $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, -3) + 1) : 1;
 
-                $data['kode_buku'] = 'BK' . $prefixKategori . $prefixJenis . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+                $data['kode_buku'] = 'BK'.$prefixKategori.$prefixJenis.str_pad($newNumber, 3, '0', STR_PAD_LEFT);
             }
 
             if ($request->hasFile('cover_buku')) {
@@ -185,21 +188,21 @@ class BukuController extends Controller
             // Update stok & harga
             if ($buku->stokHarga) {
                 $buku->stokHarga->update([
-                    'stok'  => $request->stok,
+                    'stok' => $request->stok,
                     'harga' => $request->harga,
                 ]);
             } else {
                 StokHarga::create([
                     'buku_id' => $buku->id,
-                    'stok'    => $request->stok,
-                    'harga'   => $request->harga,
+                    'stok' => $request->stok,
+                    'harga' => $request->harga,
                 ]);
             }
 
             return redirect()->route('admin.buku.index')
                 ->with('success', 'Buku berhasil diperbarui!');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Gagal update: ' . $e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Gagal update: '.$e->getMessage()]);
         }
     }
 
@@ -207,13 +210,45 @@ class BukuController extends Controller
     {
         try {
             $buku = Buku::findOrFail($id);
+
+            // ✅ CEK APAKAH BUKU SUDAH PERNAH DIGUNAKAN DALAM TRANSAKSI
+            $sudahTransaksi = \App\Models\TransaksiItem::where('buku_id', $id)->exists();
+
+            if ($sudahTransaksi) {
+                return redirect()->route('admin.buku.index')
+                    ->with('error', 'Buku tidak dapat dihapus karena sudah pernah digunakan dalam transaksi!');
+            }
+
+            // Hapus cover jika ada
+            if ($buku->cover_buku && \Storage::disk('public')->exists($buku->cover_buku)) {
+                \Storage::disk('public')->delete($buku->cover_buku);
+            }
+
+            // Hapus stok harga terkait
+            if ($buku->stokHarga) {
+                $buku->stokHarga->delete();
+            }
+
+            // Hapus buku
             $buku->delete();
+
             return redirect()->route('admin.buku.index')
                 ->with('success', 'Buku berhasil dihapus!');
+
         } catch (\Exception $e) {
             return redirect()->route('admin.buku.index')
-                ->with('error', 'Gagal menghapus buku!');
+                ->with('error', 'Gagal menghapus buku: '.$e->getMessage());
         }
+    }
+
+    public function checkTransaksi($id)
+    {
+        $jumlahTransaksi = \App\Models\TransaksiItem::where('buku_id', $id)->count();
+
+        return response()->json([
+            'sudah_transaksi' => $jumlahTransaksi > 0,
+            'jumlah_transaksi' => $jumlahTransaksi,
+        ]);
     }
 
     public function generateKode($kategori_id)
@@ -221,12 +256,12 @@ class BukuController extends Controller
         $kategori = Kategori::findOrFail($kategori_id);
 
         $prefixKategori = strtoupper(substr($kategori->kategori, 0, 2));
-        $prefixJenis    = strtoupper(substr($kategori->jenis, 0, 2));
+        $prefixJenis = strtoupper(substr($kategori->jenis, 0, 2));
 
         $lastBook = Buku::where('kategori_id', $kategori_id)->orderBy('id', 'desc')->first();
         $newNumber = $lastBook ? ((int) substr($lastBook->kode_buku, -3) + 1) : 1;
 
-        $kode_buku = 'BK' . $prefixKategori . $prefixJenis . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        $kode_buku = 'BK'.$prefixKategori.$prefixJenis.str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
         return response()->json(['kode_buku' => $kode_buku]);
     }

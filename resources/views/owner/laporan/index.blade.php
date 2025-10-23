@@ -15,32 +15,54 @@
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">
             <i class="fas fa-chart-bar text-indigo-600"></i> Laporan Penjualan</h1>
-            <a href="{{ route('owner.laporan.print', ['tanggal_awal' => $tanggal_awal, 'tanggal_akhir' => $tanggal_akhir]) }}" 
+            <a href="{{ route('owner.laporan.print', ['tanggal_awal' => $tanggal_awal, 'tanggal_akhir' => $tanggal_akhir, 'status' => request('status')]) }}" 
            target="_blank"
            class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition font-medium">
             <i class="fas fa-print"></i> Cetak Laporan
         </a>
     </div>
 
-    <!-- Filter Periode -->
+    <!-- Filter Periode & Status -->
     <div class="bg-white p-6 rounded-xl shadow-md border mb-6">
-        <form method="GET" action="{{ route('owner.laporan.index') }}" class="flex flex-wrap gap-4 items-end">
-            <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Awal</label>
-                <input type="date" name="tanggal_awal" value="{{ $tanggal_awal }}" 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+        <form method="GET" action="{{ route('owner.laporan.index') }}" class="space-y-4">
+            <!-- Filter Tanggal -->
+            <div class="flex flex-wrap gap-4 items-end">
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Awal</label>
+                    <input type="date" name="tanggal_awal" value="{{ $tanggal_awal }}" 
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex-1 min-w-[200px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
+                    <input type="date" name="tanggal_akhir" value="{{ $tanggal_akhir }}" 
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button type="submit" class="cursor-pointer px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition font-medium">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a href="{{ route('owner.laporan.index') }}" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium">
+                    <i class="fas fa-redo"></i> Reset
+                </a>
             </div>
-            <div class="flex-1 min-w-[200px]">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Akhir</label>
-                <input type="date" name="tanggal_akhir" value="{{ $tanggal_akhir }}" 
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500">
+
+            <!-- Filter Status -->
+            <div class="border-t pt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Filter Status Transaksi</label>
+                <div class="flex flex-wrap gap-3">
+                    <button type="submit" name="status" value="" 
+                            class="cursor-pointer px-4 py-2 rounded-lg font-medium transition {{ request('status') === null ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        <i class="fas fa-list"></i> Semua Transaksi
+                    </button>
+                    <button type="submit" name="status" value="selesai" 
+                            class="cursor-pointer px-4 py-2 rounded-lg font-medium transition {{ request('status') === 'selesai' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        <i class="fas fa-check-circle"></i> Hanya Selesai
+                    </button>
+                    <button type="submit" name="status" value="refund" 
+                            class="cursor-pointer px-4 py-2 rounded-lg font-medium transition {{ request('status') === 'refund' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                        <i class="fas fa-undo"></i> Hanya Refund
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="cursor-pointer px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition font-medium">
-                <i class="fas fa-filter"></i> Filter
-            </button>
-            <a href="{{ route('owner.laporan.index') }}" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium">
-                <i class="fas fa-redo"></i> Reset
-            </a>
         </form>
     </div>
 
@@ -129,69 +151,19 @@
         </div>
     </div>
     @endif
-
-    <!-- Buku Terlaris dengan Cover -->
-    @if($buku_terlaris->count() > 0)
-    <div class="bg-white p-6 rounded-xl shadow-md border mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <i class="fas fa-fire text-indigo-600"></i>
-            Top 5 Buku Terlaris Periode Ini
-        </h2>
-        <div class="space-y-3">
-            @foreach($buku_terlaris as $index => $item)
-            <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-100 hover:shadow-md transition">
-                <!-- Badge Ranking -->
-                <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow">
-                    {{ $index + 1 }}
-                </div>
-                
-                <!-- Cover Buku -->
-                <div class="flex-shrink-0">
-                    @if($item->buku && $item->buku->cover_buku)
-                    <img src="{{ asset('storage/' . $item->buku->cover_buku) }}" 
-                         alt="{{ $item->buku->judul_buku }}"
-                         class="w-12 h-16 object-cover rounded shadow-md border-2 border-white">
-                    @else
-                    <div class="w-12 h-16 bg-gray-200 rounded shadow-md border-2 border-white flex items-center justify-center">
-                        <i class="fas fa-book text-gray-400"></i>
-                    </div>
-                    @endif
-                </div>
-                
-                <!-- Info Buku -->
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-gray-800 truncate" title="{{ $item->buku->judul_buku ?? '-' }}">
-                        {{ $item->buku->judul_buku ?? '-' }}
-                    </p>
-                    <p class="text-xs text-gray-600 mt-1">
-                        <span class="inline-flex items-center">
-                            <i class="fas fa-boxes text-indigo-500 mr-1"></i>
-                            Stok: <span class="font-semibold ml-1">{{ $item->buku->stokHarga->stok ?? 0 }}</span>
-                        </span>
-                        <span class="mx-2">|</span>
-                        <span class="inline-flex items-center">
-                            <i class="fas fa-tag text-green-500 mr-1"></i>
-                            Rp {{ number_format($item->buku->stokHarga->harga ?? 0, 0, ',', '.') }}
-                        </span>
-                    </p>
-                </div>
-                
-                <!-- Jumlah Terjual -->
-                <div class="flex-shrink-0 text-right">
-                    <p class="text-2xl font-bold text-indigo-600">{{ $item->total_terjual }}</p>
-                    <p class="text-xs text-gray-500">Terjual</p>
-                </div>
-            </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
     <!-- Tabel Transaksi -->
     <div class="bg-white rounded-xl shadow-md border overflow-hidden">
         <div class="p-6 border-b bg-gray-50">
             <h2 class="text-xl font-bold text-gray-800">
-                <i class="fas fa-clipboard text-indigo-600"></i> Riwayat Transaksi</h2>
+                <i class="fas fa-clipboard text-indigo-600"></i> Riwayat Transaksi
+                @if(request('status') === 'selesai')
+                    <span class="text-green-600">(Selesai)</span>
+                @elseif(request('status') === 'refund')
+                    <span class="text-red-600">(Refund)</span>
+                @else
+                    <span class="text-indigo-600">(Semua)</span>
+                @endif
+            </h2>
             <p class="text-sm text-gray-600 mt-1">
                 Periode: {{ \Carbon\Carbon::parse($tanggal_awal)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($tanggal_akhir)->format('d/m/Y') }}
             </p>
@@ -262,33 +234,26 @@
                 </tbody>
                 <tfoot class="bg-gray-100">
                     <tr class="font-bold">
-                        <td colspan="3" class="px-6 py-4 text-right">GRAND TOTAL (Berhasil):</td>
+                        <td colspan="3" class="px-6 py-4 text-right">
+                            @if(request('status') === 'refund')
+                                TOTAL REFUND:
+                            @elseif(request('status') === 'selesai')
+                                TOTAL SELESAI:
+                            @else
+                                GRAND TOTAL (Berhasil):
+                            @endif
+                        </td>
                         <td class="px-6 py-4 text-sm">
-                            Rp {{ number_format($transaksis->where('status', '!=', 'refund')->sum('total_harga'), 0, ',', '.') }}
+                            Rp {{ number_format($transaksis->sum('total_harga'), 0, ',', '.') }}
                         </td>
                         <td class="px-6 py-4 text-sm text-red-600">
-                            Rp {{ number_format($transaksis->where('status', '!=', 'refund')->sum('diskon'), 0, ',', '.') }}
+                            Rp {{ number_format($transaksis->sum('diskon'), 0, ',', '.') }}
                         </td>
                         <td class="px-6 py-4 text-sm text-green-600">
-                            Rp {{ number_format($transaksis->where('status', '!=', 'refund')->sum('subtotal'), 0, ',', '.') }}
+                            Rp {{ number_format($transaksis->sum('subtotal'), 0, ',', '.') }}
                         </td>
                         <td colspan="3"></td>
                     </tr>
-                    @if($transaksis->where('status', 'refund')->count() > 0)
-                    <tr class="font-bold text-red-600">
-                        <td colspan="3" class="px-6 py-4 text-right">TOTAL REFUND:</td>
-                        <td class="px-6 py-4 text-sm">
-                            Rp {{ number_format($transaksis->where('status', 'refund')->sum('total_harga'), 0, ',', '.') }}
-                        </td>
-                        <td class="px-6 py-4 text-sm">
-                            Rp {{ number_format($transaksis->where('status', 'refund')->sum('diskon'), 0, ',', '.') }}
-                        </td>
-                        <td class="px-6 py-4 text-sm">
-                            Rp {{ number_format($transaksis->where('status', 'refund')->sum('subtotal'), 0, ',', '.') }}
-                        </td>
-                        <td colspan="3"></td>
-                    </tr>
-                    @endif
                 </tfoot>
             </table>
         </div>
@@ -302,7 +267,15 @@
             <div class="inline-block bg-gray-100 p-6 rounded-full mb-4">
                 <i class="fas fa-inbox text-4xl text-gray-400"></i>
             </div>
-            <p class="text-gray-500 text-lg">Tidak ada transaksi pada periode ini</p>
+            <p class="text-gray-500 text-lg">
+                Tidak ada transaksi 
+                @if(request('status') === 'selesai')
+                    dengan status <strong>Selesai</strong>
+                @elseif(request('status') === 'refund')
+                    dengan status <strong>Refund</strong>
+                @endif
+                pada periode ini
+            </p>
         </div>
         @endif
     </div>

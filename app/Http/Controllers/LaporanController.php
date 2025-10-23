@@ -22,14 +22,30 @@ class LaporanController extends Controller
         $tanggal_awal = $request->input('tanggal_awal', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $tanggal_akhir = $request->input('tanggal_akhir', Carbon::now()->format('Y-m-d'));
         
-        // Query transaksi dengan filter tanggal (semua transaksi termasuk refund untuk ditampilkan)
-        $transaksis = Transaksi::with(['kasir', 'items.buku', 'refundBy'])
+        // Ambil parameter filter status
+        $status_filter = $request->input('status'); // null, 'selesai', atau 'refund'
+        
+        // Query transaksi dengan filter tanggal DAN status
+        $query = Transaksi::with(['kasir', 'items.buku', 'refundBy'])
             ->whereBetween('created_at', [
                 Carbon::parse($tanggal_awal)->startOfDay(),
                 Carbon::parse($tanggal_akhir)->endOfDay()
-            ])
-            ->latest()
-            ->paginate(15);
+            ]);
+        
+        // Filter berdasarkan status jika ada
+        if ($status_filter === 'selesai') {
+            // Hanya transaksi yang BUKAN refund
+            $query->where(function($q) {
+                $q->where('status', '!=', 'refund')
+                  ->orWhereNull('status');
+            });
+        } elseif ($status_filter === 'refund') {
+            // Hanya transaksi refund
+            $query->where('status', 'refund');
+        }
+        // Jika $status_filter === null, tampilkan semua (tidak ada filter tambahan)
+        
+        $transaksis = $query->latest()->paginate(15);
         
         // Statistik - HANYA transaksi berhasil (tidak termasuk refund)
         $total_transaksi = Transaksi::whereBetween('created_at', [
@@ -137,34 +153,48 @@ class LaporanController extends Controller
     {
         $tanggal_awal = $request->input('tanggal_awal', Carbon::now()->startOfMonth()->format('Y-m-d'));
         $tanggal_akhir = $request->input('tanggal_akhir', Carbon::now()->format('Y-m-d'));
+        $status_filter = $request->input('status'); // Ambil filter status untuk print juga
         
-        // Ambil semua transaksi termasuk yang di-refund untuk laporan lengkap
-        $transaksis = Transaksi::with(['kasir', 'items.buku', 'refundBy'])
+        // Query dengan filter status
+        $query = Transaksi::with(['kasir', 'items.buku', 'refundBy'])
             ->whereBetween('created_at', [
                 Carbon::parse($tanggal_awal)->startOfDay(),
                 Carbon::parse($tanggal_akhir)->endOfDay()
-            ])
-            ->latest()
-            ->get();
+            ]);
         
-        // Hitung total hanya dari transaksi berhasil (tidak termasuk refund)
-        $transaksi_berhasil = $transaksis->filter(function($t) {
-            return $t->status !== 'refund';
-        });
+        // Filter berdasarkan status jika ada
+        if ($status_filter === 'selesai') {
+            $query->where(function($q) {
+                $q->where('status', '!=', 'refund')
+                  ->orWhereNull('status');
+            });
+        } elseif ($status_filter === 'refund') {
+            $query->where('status', 'refund');
+        }
         
-        $total_pendapatan = $transaksi_berhasil->sum('subtotal');
-        $total_diskon = $transaksi_berhasil->sum('diskon');
-        $total_buku_terjual = $transaksi_berhasil->sum(function($t) {
+        $transaksis = $query->latest()->get();
+        
+        // Hitung total berdasarkan transaksi yang sudah difilter
+        $total_pendapatan = $transaksis->sum('subtotal');
+        $total_diskon = $transaksis->sum('diskon');
+        $total_buku_terjual = $transaksis->sum(function($t) {
             return $t->items->sum('qty');
         });
         
-        // Statistik refund
-        $transaksi_refund = $transaksis->filter(function($t) {
-            return $t->status === 'refund';
-        });
+        // Statistik refund (untuk semua transaksi, bukan yang difilter)
+        $total_refund = Transaksi::whereBetween('created_at', [
+            Carbon::parse($tanggal_awal)->startOfDay(),
+            Carbon::parse($tanggal_akhir)->endOfDay()
+        ])
+        ->where('status', 'refund')
+        ->count();
         
-        $total_refund = $transaksi_refund->count();
-        $total_nilai_refund = $transaksi_refund->sum('subtotal');
+        $total_nilai_refund = Transaksi::whereBetween('created_at', [
+            Carbon::parse($tanggal_awal)->startOfDay(),
+            Carbon::parse($tanggal_akhir)->endOfDay()
+        ])
+        ->where('status', 'refund')
+        ->sum('subtotal');
         
         return view('owner.laporan.print', compact(
             'transaksis',
@@ -174,7 +204,8 @@ class LaporanController extends Controller
             'total_diskon',
             'total_buku_terjual',
             'total_refund',
-            'total_nilai_refund'
+            'total_nilai_refund',
+            'status_filter'
         ));
     }
 }

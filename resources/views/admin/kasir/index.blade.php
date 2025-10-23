@@ -248,7 +248,7 @@
                 </div>
             `,
             showConfirmButton: true,
-            confirmButtonText: '<i class="fas fa-times mr-2"></i>Tutup',
+            confirmButtonText: '<p class="cursor-pointer"><i class="fas fa-times mr-2"></i>Tutup</p>',
             width: 500,
             customClass: {
                 popup: 'rounded-3xl shadow-2xl',

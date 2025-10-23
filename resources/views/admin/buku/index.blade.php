@@ -223,28 +223,70 @@
 
 @push('scripts')
 <script>
-    function confirmDelete(id, judul) {
+function confirmDelete(id, judul) {
+    // ✅ Cek dulu apakah buku sudah pernah ditransaksikan
+    fetch(`/admin/buku/${id}/check-transaksi`, {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sudah_transaksi) {
+            // ❌ Tidak bisa dihapus
+            Swal.fire({
+                icon: 'error',
+                title: 'Tidak Dapat Dihapus!',
+                html: `
+                    <p class="text-gray-700 mb-3">
+                        Buku <b>"${judul}"</b> tidak dapat dihapus karena sudah pernah digunakan dalam <b>${data.jumlah_transaksi} transaksi</b>.
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle"></i> Data ini diperlukan untuk menjaga integritas histori transaksi.
+                    </p>
+                `,
+                confirmButtonColor: '#3b82f6',
+                confirmButtonText: 'Mengerti',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg'
+                }
+            });
+        } else {
+            // ✅ Bisa dihapus - tampilkan konfirmasi
+            Swal.fire({
+                title: 'Yakin hapus?',
+                text: `Buku "${judul}" akan dihapus permanen.`,
+                icon: 'warning',
+                iconColor: '#ef4444',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash mr-2"></i>Ya, Hapus!',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'cursor-pointer bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg mr-2',
+                    cancelButton: 'cursor-pointer bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
         Swal.fire({
-            title: 'Yakin hapus?',
-            text: "Buku \"" + judul + "\" akan dihapus permanen.",
-            icon: 'warning',
-            iconColor: '#ef4444',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626',
-            cancelButtonColor: '#6b7280',
-            confirmButtonText: '<i class="fas fa-trash mr-2"></i>Ya, Hapus!',
-            cancelButtonText: '<i class="fas fa-times mr-2"></i>Batal',
-            buttonsStyling: false,
-            customClass: {
-                confirmButton: 'bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg mr-2',
-                cancelButton: 'bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        })
-    }
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Terjadi kesalahan saat memeriksa data buku!',
+        });
+    });
+}
 </script>
 
 <script>

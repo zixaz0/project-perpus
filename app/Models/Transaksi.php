@@ -42,4 +42,9 @@ class Transaksi extends Model
     public function refundBy() {
         return $this->belongsTo(User::class, 'refund_by');
     }
+    // Di Model Transaksi (App\Models\Transaksi.php)
+    public function buku()
+    {
+        return $this->belongsTo(Buku::class);
+    }
 }

@@ -19,6 +19,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LaporanController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return view('login');
@@ -27,17 +28,27 @@ Route::get('/', function () {
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto'])
-    ->name('profile.updatePhoto')
-    ->middleware('auth');
 Route::post('/pembayaran', [PembayaranController::class, 'bayar'])->name('pembayaran.bayar');
+
+// ✅ PINDAHKAN KE SINI - Route yang butuh authentication
+Route::middleware('auth')->group(function () {
+    // Profile Update Photo
+    Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto'])->name('profile.updatePhoto');
+    
+    // ✅ Notifikasi (Untuk semua role yang sudah login)
+    Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('notifications.get');
+});
 
 // ===================================================
 // =============== ADMIN ROUTES =======================
 // ===================================================
 Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/kasir.index', [UserController::class, 'KasirIndex'])->name('admin.kasir.index');
+    
+    // ✅ PERBAIKAN: Tambahkan kedua route dengan path berbeda
+    Route::get('/admin/kasir', [UserController::class, 'index'])->name('admin.kasir.index');
+    Route::get('/kasir/index', [UserController::class, 'index'])->name('kasir.index');
+    
     Route::get('admin/riwayat-transaksi', [TransaksiController::class, 'riwayatadmin'])->name('admin.riwayat_transaksi.index');
 
     // Buku
@@ -45,6 +56,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
     Route::get('/buku/{id}/edit', [BukuController::class, 'edit'])->name('buku.edit');
     Route::put('/buku/{id}', [BukuController::class, 'update'])->name('buku.update');
     Route::get('/admin/buku/generate-kode/{kategori_id}', [BukuController::class, 'generateKode'])->name('admin.buku.generateKode');
+    Route::get('/buku/{id}/check-transaksi', [BukuController::class, 'checkTransaksi'])
+        ->name('admin.buku.checkTransaksi');
 
     // Stok & Harga
     Route::resource('admin/stok_harga', StokHargaController::class)->names('admin.stok_harga');
@@ -54,7 +67,6 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
 
     // Kasir Management
     Route::prefix('admin')->group(function () {
-        Route::get('/kasir', [UserController::class, 'kasirIndex'])->name('kasir.index');
         Route::get('/kasir/create', [UserController::class, 'kasirCreate'])->name('kasir.create');
         Route::post('/kasir', [UserController::class, 'kasirStore'])->name('kasir.store');
         Route::delete('/kasir/{id}', [UserController::class, 'kasirDestroy'])->name('kasir.destroy');
@@ -66,8 +78,8 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
         Route::resource('kategori', KategoriController::class)
             ->names('admin.kategori')
             ->except(['show']);
+        
         // Activity Log (Admin)
-
         Route::get('/logs', [ActivityLogController::class, 'index'])->name('admin.logs.index');
         Route::get('/logs/{log}', [ActivityLogController::class, 'show'])->name('admin.logs.show');
     });

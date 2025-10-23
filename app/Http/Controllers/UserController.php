@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function kasirIndex(Request $request)
+    public function index(Request $request)
     {
         $title = 'Management Kasir';
         $query = User::where('role', 'kasir');
@@ -67,7 +67,7 @@ class UserController extends Controller
             'foto'     => $fotoPath,
         ]);
 
-        return redirect()->route('kasir.index')->with('success', 'Kasir berhasil ditambahkan!');
+        return redirect()->route('admin.kasir.index')->with('success', 'Kasir berhasil ditambahkan!');
     }
 
     // 🔹 Edit Kasir
@@ -114,7 +114,7 @@ class UserController extends Controller
 
         $kasir->save();
 
-        return redirect()->route('kasir.index')->with('success', 'Kasir berhasil diupdate!');
+        return redirect()->route('admin.kasir.index')->with('success', 'Kasir berhasil diupdate!');
     }
 
 
@@ -123,6 +123,6 @@ class UserController extends Controller
         $kasir = User::where('role', 'kasir')->findOrFail($id);
         $kasir->delete();
 
-        return redirect()->route('kasir.index')->with('success', 'Kasir berhasil dihapus!');
+        return redirect()->route('admin.kasir.index')->with('success', 'Kasir berhasil dihapus!');
     }
 }
